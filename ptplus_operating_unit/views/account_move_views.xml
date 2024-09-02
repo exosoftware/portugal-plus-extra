@@ -7,11 +7,15 @@
         <field name="inherit_id" ref="ptplus.view_move_form_pt" />
         <field name="arch" type="xml">
             <field name="fiscal_document_type_id" position="attributes">
-                <attribute name="domain">[('source_billing', '=', source_billing),
-                                          ('section', '=', 'invoice'),
-                                          ('correction', '=', (move_type == 'out_refund')),
-                                          ('reversion', '=', (move_type == 'out_refund')),
-                                          ('operating_unit_id', 'in', (False, operating_unit_id))]</attribute>
+                <attribute name="domain">
+                    [
+                        ('source_billing', '=', source_billing),
+                        ('section', '=', 'invoice'),
+                        ('correction', '=', (move_type == 'out_refund')),
+                        ('reversion', '=', (move_type == 'out_refund')),
+                        ('operating_unit_id', 'in', (False, operating_unit_id))
+                    ]
+                </attribute>
             </field>
         </field>
     </record>

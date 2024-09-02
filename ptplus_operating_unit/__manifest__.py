@@ -19,6 +19,6 @@
         "views/account_payment_views.xml",
         "wizards/account_payment_register_views.xml",
     ],
-    "installable": False,
+    "installable": True,
     "auto_install": True,
 }

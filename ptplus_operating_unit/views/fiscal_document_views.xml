@@ -10,9 +10,9 @@
         <field name="arch" type="xml">
             <field name="company_id" position="after">
                 <field
-          name="operating_unit_id"
-          groups="operating_unit.group_multi_operating_unit"
-        />
+                    name="operating_unit_id"
+                    groups="operating_unit.group_multi_operating_unit"
+                />
             </field>
         </field>
     </record>
@@ -24,10 +24,10 @@
         <field name="arch" type="xml">
             <field name="company_id" position="after">
                 <field
-          name="operating_unit_id"
-          groups="operating_unit.group_multi_operating_unit"
-          options="{'no_create': True}"
-        />
+                    name="operating_unit_id"
+                    groups="operating_unit.group_multi_operating_unit"
+                    options="{'no_create': True}"
+                />
             </field>
         </field>
     </record>
@@ -39,9 +39,9 @@
         <field name="arch" type="xml">
             <field name="name" position="after">
                 <field
-          name="operating_unit_id"
-          groups="operating_unit.group_multi_operating_unit"
-        />
+                    name="operating_unit_id"
+                    groups="operating_unit.group_multi_operating_unit"
+                />
             </field>
         </field>
     </record>
