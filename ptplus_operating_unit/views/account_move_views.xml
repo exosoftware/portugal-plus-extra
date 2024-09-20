@@ -6,6 +6,9 @@
         <field name="model">account.move</field>
         <field name="inherit_id" ref="ptplus.view_move_form_pt" />
         <field name="arch" type="xml">
+            <field name="fiscal_document_type_id" position="before">
+                <field name="operating_unit_id" invisible="1" />
+            </field>
             <field name="fiscal_document_type_id" position="attributes">
                 <attribute name="domain">
                     [
