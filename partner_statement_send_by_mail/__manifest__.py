@@ -3,10 +3,10 @@
 
 {
     "name": "Partner Statement Send by Email",
-    "version": "17.0.1.0.1",
+    "version": "18.0.1.0.1",
     "license": "AGPL-3",
     "author": "Exo Software, Odoo Community Association (OCA)",
-    "website": "https://github.com/OCA/web",
+    "website": "https://exosoftware.pt",
     "category": "Accounting & Finance",
     "depends": [
         "partner_statement",

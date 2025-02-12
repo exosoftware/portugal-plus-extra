@@ -1,0 +1,26 @@
+# Do NOT update manually; changes here will be overwritten by Copier
+_commit: v1.29
+_src_path: https://github.com/OCA/oca-addons-repo-template.git
+ci: GitHub
+convert_readme_fragments_to_markdown: false
+enable_checklog_odoo: true
+generate_requirements_txt: false
+github_check_license: true
+github_ci_extra_env: {}
+github_enable_codecov: true
+github_enable_makepot: true
+github_enable_stale_action: true
+github_enforce_dev_status_compatibility: false
+include_wkhtmltopdf: false
+odoo_test_flavor: OCB
+odoo_version: 18.0
+org_name: Exo Software
+org_slug: exosoftware
+rebel_module_groups: []
+repo_description: Glue modules between ptplus and 3rd party apps
+repo_name: Portugal Plus Extra Addons
+repo_slug: portugal-plus-extra
+repo_website: https://github.com/exosoftware/portugal-plus-extra
+use_pyproject_toml: false
+use_ruff: false
+

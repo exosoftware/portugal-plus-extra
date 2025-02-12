@@ -13,19 +13,18 @@
                     help="These configurations will allow you to block document issuance on certain partners and products."
                     invisible="not pt_invoicing"
                 >
-                    <field name="l10n_pt_issuance_blocking"/>
+                    <field name="l10n_pt_issuance_blocking" />
 
                     <div class="mt16 text-muted">
                         <div>
-                            <field name="l10n_pt_issuance_blocking_archived"/>
-                            <label for="l10n_pt_issuance_blocking_archived"/>
+                            <field name="l10n_pt_issuance_blocking_archived" />
+                            <label for="l10n_pt_issuance_blocking_archived" />
                         </div>
                         <div>
-                            <field name="l10n_pt_issuance_blocking_sale_not_ok"/>
-                            <label for="l10n_pt_issuance_blocking_sale_not_ok"/>
+                            <field name="l10n_pt_issuance_blocking_sale_not_ok" />
+                            <label for="l10n_pt_issuance_blocking_sale_not_ok" />
                         </div>
                     </div>
-
                 </setting>
             </xpath>
         </field>

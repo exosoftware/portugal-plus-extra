@@ -3,7 +3,7 @@
 
 {
     "name": "Portugal - Stock with Operating Units",
-    "version": "17.0.4.0.0",
+    "version": "18.0.4.0.0",
     "author": "Exo Software, " "Odoo Community Association (OCA)",
     "website": "https://exosoftware.pt",
     "license": "LGPL-3",
@@ -15,6 +15,6 @@
     "data": [
         "views/stock_picking_views.xml",
     ],
-    "installable": True,
+    "installable": False,
     "auto_install": True,
 }

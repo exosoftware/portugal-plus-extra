@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-
     <record id="view_account_payment_register_form_pt_ou" model="ir.ui.view">
         <field name="name">account.payment.register.form.pt.ou</field>
         <field name="model">account.payment.register</field>
@@ -8,23 +7,22 @@
         <field name="arch" type="xml">
             <field name="fiscal_document_type_id" position="before">
                 <field
-          name="operating_unit_id"
-          invisible="True"
-          groups="!operating_unit.group_multi_operating_unit"
-        />
+                    name="operating_unit_id"
+                    invisible="True"
+                    groups="!operating_unit.group_multi_operating_unit"
+                />
                 <field
-          name="operating_unit_id"
-          groups="operating_unit.group_multi_operating_unit"
-        />
+                    name="operating_unit_id"
+                    groups="operating_unit.group_multi_operating_unit"
+                />
             </field>
 
             <field name="fiscal_document_type_id" position="attributes">
                 <attribute
-          name="domain"
-        >[('source_billing', '=', source_billing), ('section', '=', 'pay'),
+                    name="domain"
+                >[('source_billing', '=', source_billing), ('section', '=', 'pay'),
                                           ('type', '=', 'RG'), ('company_id', '=', company_id), ('operating_unit_id', 'in', (False, operating_unit_id))]</attribute>
             </field>
         </field>
     </record>
-
 </odoo>

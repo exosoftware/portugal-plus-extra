@@ -2,7 +2,6 @@
 <!-- Copyright 2019 Exo Softwre, Lda.
      License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0) -->
 <odoo>
-
     <record id="fiscal_document_type_view_tree_ou" model="ir.ui.view">
         <field name="name">fiscal.document.type.tree.ou</field>
         <field name="model">fiscal.document.type</field>
@@ -45,5 +44,4 @@
             </field>
         </field>
     </record>
-
 </odoo>
