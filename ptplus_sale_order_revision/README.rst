@@ -1,4 +1,4 @@
-Portugal - Versions for sale orders and quotations
+Portugal - Revisions for sale orders and quotations
 ==================================================
 
 This module introduces the following enhancements:
