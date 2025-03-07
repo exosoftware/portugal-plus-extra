@@ -7,7 +7,7 @@
             <form string="New Order">
                 <field name="invoice_ids" invisible="1" />
                 <div class="o_row">
-                    <label for="invoices " invisible="not invoice_ids" string="Do you want to copy invoices?"/>
+                    <label for="invoices" invisible="not invoice_ids" string="Do you want to copy invoices?"/>
                     <field name="invoices" invisible="not invoice_ids" widget="boolean_toggle"/>
                 </div>
                 <div class="o_row">
