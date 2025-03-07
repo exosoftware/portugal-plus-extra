@@ -6,14 +6,15 @@
         <field name="arch" type="xml">
             <form string="New Order">
                 <field name="invoice_ids" invisible="1" />
-                <span class="mr8">Order</span>
-                <field name="order_id" readonly="1"/>
                 <div class="o_row">
-                    <label for="invoices" string="Do you want to copy invoices?"/>
-                    <field name="invoices"  invisible="not invoice_ids" widget="boolean_toggle"/>
+                    <label for="invoices " invisible="not invoice_ids" string="Do you want to copy invoices?"/>
+                    <field name="invoices" invisible="not invoice_ids" widget="boolean_toggle"/>
+                </div>
+                <div class="o_row">
                     <label for="chatter" string="Do you want to copy the chatter?"/>
                     <field name="chatter" widget="boolean_toggle"/>
                 </div>
+
                 <footer>
                     <button name="pt_create_revision" type="object" string="Create Order" class="btn-primary"/>
                     <button name="cancel" special="cancel" string="Cancel"/>

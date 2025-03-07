@@ -41,11 +41,16 @@ class WizardOrderRevision(models.TransientModel):
                     }
                 )
 
-            if self.invoices:
-                for invoice in rec.invoice_ids:
-                    invoice.write({'invoice_origin': copied_rec.name})
-                    for line in invoice.invoice_line_ids:
-                        line.write({'sale_line_ids': [(6, 0, copied_rec.order_line.ids)]})
+            # Added attachments
+            attachments = self.env['ir.attachment'].search([('res_model', '=', 'sale.order'), ('res_id', '=', rec.id)])
+            for attachment in attachments:
+                attachment.copy({'res_id': copied_rec.id, 'res_model': 'sale.order'})
+
+        if self.invoices:
+            for invoice in rec.invoice_ids:
+                invoice.write({'invoice_origin': copied_rec.name})
+                for line in invoice.invoice_line_ids:
+                    line.write({'sale_line_ids': [(6, 0, copied_rec.order_line.ids)]})
 
         msg = _("New revision created: %s") % copied_rec.l10n_pt_revision_name
         copied_rec.message_post(body=msg)
