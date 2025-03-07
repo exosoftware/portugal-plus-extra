@@ -10,8 +10,8 @@
                 t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2"
                 t-if="doc.l10n_pt_revision_name and doc.country_code == 'PT'"
             >
-                <strong>Fiscal Budget</strong><br />
-                <span t-field="doc.l10n_pt_revision_name" />
+                <strong>Quotation Number</strong><br />
+                <span t-field="doc.name" />
             </div>
         </xpath>
     </template>
