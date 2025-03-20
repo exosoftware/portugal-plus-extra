@@ -1,5 +1,6 @@
+===================================================
 Portugal - Revisions for sale orders and quotations
-==================================================
+===================================================
 
 This module introduces the following enhancements:
 
