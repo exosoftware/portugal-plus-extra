@@ -15,8 +15,9 @@ class WizardOrderRevision(models.TransientModel):
         related="order_id.invoice_ids",
     )
     invoices = fields.Boolean(
+        string="Copy Invoices",
         default=True,
-        help="Copy invoices"
+        help="Copy invoices."
     )
 
     def pt_create_revision(self):
