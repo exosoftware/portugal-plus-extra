@@ -27,9 +27,12 @@ class SaleOrder(models.Model):
         if self.country_code != "PT":
             return res
 
-        res.update({"l10n_pt_revision_name": "%s.%02d"
-                    % (self.unrevisioned_name, new_rev_number),})
-        res.pop("name", None)
+        revision_name = "%s.%02d" % (self.unrevisioned_name, new_rev_number)
+        res.update(
+        {
+            "l10n_pt_revision_name": revision_name,
+            "name": revision_name,
+        })
 
         return res
 
