@@ -5,12 +5,12 @@
         id="report_saleorder_document"
         inherit_id="sale.report_saleorder_document"
     >
-        <xpath expr="//div[@t-if='doc.user_id.name']" position="before">
+        <xpath expr="//div[@t-if='doc.user_id.name']" position="after">
             <div
-                t-attf-class="#{'col-auto col-3 mw-100' if report_type != 'html' else 'col'} mb-2"
-                t-if="doc.l10n_pt_revision_name and doc.country_code == 'PT'"
+                class="col-auto col-3 mw-100 mb-2"
+                t-if="doc.country_code == 'PT' and doc.state in ['sent', 'sale', 'cancel']"
             >
-                <strong>Quotation Number</strong><br />
+                <strong>AT Doc:</strong><br />
                 <span t-field="doc.name" />
             </div>
         </xpath>
