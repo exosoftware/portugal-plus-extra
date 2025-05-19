@@ -5,11 +5,11 @@
         id="report_saleorder_document"
         inherit_id="sale.report_saleorder_document"
     >
-        <xpath expr="//div[@t-if='doc.user_id.name']" position="after">
+        <xpath expr="//div[@name='expiration_date']" position="before">
             <div
-                class="col-auto col-3 mw-100 mb-2"
-                t-if="doc.country_code == 'PT' and doc.state in ['sent', 'sale', 'cancel']"
-            >
+                   class ="col"
+                    t-if="doc.country_code == 'PT' and doc.state in ['sent', 'sale', 'cancel']"
+                >
                 <strong>AT Doc:</strong><br />
                 <span t-field="doc.name" />
             </div>
