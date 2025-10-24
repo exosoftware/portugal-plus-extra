@@ -10,7 +10,7 @@
                 class="col-auto col-3 mw-100 mb-2"
                 t-if="doc.country_code == 'PT' and doc.state in ['sent', 'sale', 'cancel']"
             >
-                <strong>AT Doc:</strong><br />
+                <strong>Fiscal Doc. No.</strong><br />
                 <span t-field="doc.name" />
             </div>
         </xpath>
