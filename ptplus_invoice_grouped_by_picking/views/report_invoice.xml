@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_invoice_document"
+              inherit_id="account_invoice_report_grouped_by_picking.report_invoice_document">
+
+        <xpath expr="//t[@t-foreach='lines_grouped']//td[hasclass('o_price_total')]//tr" position="attributes">
+            <attribute name="t-if">False</attribute>
+        </xpath>
+
+        <xpath expr="//t[@t-set='lines_grouped']" position="after">
+            <t t-set="has_returns" t-value="o.lines_grouped_contains_returns(lines_grouped)"/>
+        </xpath>
+
+        <xpath expr="//th[@name='th_quantity']" position="before">
+            <th t-if="has_returns" name="th_quantity_moved" class="text-right text-muted">
+                <span>Moved Qty.</span>
+            </th>
+        </xpath>
+
+        <xpath expr="//td/span[@t-esc='lines_group['quantity']']" position="attributes">
+            <attribute name="t-esc">lines_group['quantity_invoiced']</attribute>
+        </xpath>
+
+        <xpath expr="//td/span[@t-esc='lines_group['quantity_invoiced']']/.." position="before">
+            <td t-if="has_returns" class="text-right text-muted">
+                <span t-esc="lines_group['quantity']"
+                      t-options="{'widget': 'float', 'decimal_precision': 'Product Unit of Measure'}"/>
+                <span t-field="line.product_uom_id" groups="uom.group_uom"/>
+            </td>
+        </xpath>
+
+        <xpath expr="//span[@t-field='picking.name']" position="attributes">
+            <attribute name="t-if">picking.system_entry_date</attribute>
+        </xpath>
+
+    </template>
+
+</odoo>
