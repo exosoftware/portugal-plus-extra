@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="edit_project_inherit" model="ir.ui.view">
+        <field name="name">project.project.form.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project" />
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_view_tasks']" position="before">
+                <button
+                    class="oe_stat_button"
+                    name="action_open_crm_lead"
+                    type="object"
+                    icon="fa-handshake-o"
+                    invisible="not crm_id"
+                >
+                    <span class="text-center">Lead</span>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

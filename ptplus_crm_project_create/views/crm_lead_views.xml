@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="crm_lead_view_form_inherit" model="ir.ui.view">
+        <field name="name">crm.lead.form.inherit</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form" />
+        <field name="arch" type="xml">
+            <button name="action_show_potential_duplicates" position="after">
+                <button
+                    name="action_open_crm_project"
+                    type="object"
+                    icon="fa-folder-open"
+                    invisible="not project_id"
+                >
+                    <span class="o_stat_text">Project</span>
+                </button>
+                <button
+                    name="action_view_crm_project_tasks"
+                    type="object"
+                    icon="fa-check"
+                    invisible="not project_id"
+                >
+                    <span class="o_stat_text">Tasks</span>
+                </button>
+            </button>
+        </field>
+    </record>
+</odoo>
