@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Partner -->
+    <record id="view_partner_form_pt_blocking" model="ir.ui.view">
+        <field name="name">res.partner.form.pt.blocking</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form" />
+        <field name="arch" type="xml">
+            <xpath
+                expr="//page[@name='sales_purchases']//field[@name='user_id']"
+                position="after"
+            >
+                <field
+                    name="l10n_pt_issuance_blocking"
+                    invisible="country_code != 'PT'"
+                />
+            </xpath>
+        </field>
+    </record>
+</odoo>

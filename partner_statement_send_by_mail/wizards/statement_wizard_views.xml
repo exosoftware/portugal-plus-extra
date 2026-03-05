@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="statement_common_view" model="ir.ui.view">
+        <field name="name">Statement Common Wizard View</field>
+        <field name="model">statement.common.wizard</field>
+        <field name="inherit_id" ref="partner_statement.statement_common_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='button_export_pdf']" position="after">
+                <button
+                    name="button_send_mail"
+                    string="Send by Email"
+                    type="object"
+                    class="oe_highlight"
+                />
+            </xpath>
+        </field>
+    </record>
+</odoo>

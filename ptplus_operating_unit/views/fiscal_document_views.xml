@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<!-- Copyright 2019 Exo Softwre, Lda.
+     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl-3.0) -->
+<odoo>
+    <record id="fiscal_document_type_view_tree_ou" model="ir.ui.view">
+        <field name="name">fiscal.document.type.tree.ou</field>
+        <field name="model">fiscal.document.type</field>
+        <field name="inherit_id" ref="ptplus.fiscal_document_type_view_tree" />
+        <field name="arch" type="xml">
+            <field name="company_id" position="after">
+                <field
+                    name="operating_unit_id"
+                    groups="operating_unit.group_multi_operating_unit"
+                />
+            </field>
+        </field>
+    </record>
+
+    <record id="fiscal_document_type_view_form_ou" model="ir.ui.view">
+        <field name="name">fiscal.document.type.form.ou</field>
+        <field name="model">fiscal.document.type</field>
+        <field name="inherit_id" ref="ptplus.fiscal_document_type_view_form" />
+        <field name="arch" type="xml">
+            <field name="company_id" position="after">
+                <field
+                    name="operating_unit_id"
+                    groups="operating_unit.group_multi_operating_unit"
+                    options="{'no_create': True}"
+                />
+            </field>
+        </field>
+    </record>
+
+    <record id="fiscal_document_type_view_search_ou" model="ir.ui.view">
+        <field name="name">fiscal.document.type.search.ou</field>
+        <field name="model">fiscal.document.type</field>
+        <field name="inherit_id" ref="ptplus.fiscal_document_type_view_search" />
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field
+                    name="operating_unit_id"
+                    groups="operating_unit.group_multi_operating_unit"
+                />
+            </field>
+        </field>
+    </record>
+</odoo>

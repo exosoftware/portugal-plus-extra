@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Sales order form  -->
+    <record id="view_order_form_pt_ou" model="ir.ui.view">
+        <field name="name">view.order.form.pt.ou</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="ptplus_sale.view_order_form" />
+        <field name="arch" type="xml">
+            <field name="user_id" position="after">
+                <field
+                    name="operating_unit_id"
+                    invisible="True"
+                    groups="!operating_unit.group_multi_operating_unit"
+                />
+            </field>
+            <field name="fiscal_document_type_id" position="attributes">
+                <attribute name="domain">
+                    [
+                        ('source_billing', '=', source_billing),
+                        ('section', '=', 'work'), ('type', '!=', 'NE'),
+                        ('operating_unit_id', 'in', (False, operating_unit_id))
+                    ]
+                </attribute>
+            </field>
+        </field>
+    </record>
+</odoo>

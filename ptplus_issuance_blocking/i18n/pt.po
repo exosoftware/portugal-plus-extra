@@ -1,0 +1,170 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* ptplus_issuance_blocking
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-12-02 19:32+0000\n"
+"PO-Revision-Date: 2023-12-02 19:36+0000\n"
+"Last-Translator: Pedro Castro Silva <pedrocs@exo.pt>\n"
+"Language-Team: \n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 3.4.1\n"
+
+#. module: ptplus_issuance_blocking
+#: model_terms:ir.ui.view,arch_db:ptplus_issuance_blocking.res_config_settings_view_form_pt_blocking
+msgid ""
+"<span class=\"fa fa-lg fa-building-o\" title=\"Values set here are company-"
+"specific.\" aria-label=\"Values set here are company-specific.\" "
+"groups=\"base.group_multi_company\" role=\"img\"/>"
+msgstr ""
+"<span class=\"fa fa-lg fa-building-o\" title=\"Os valores atribuídos aqui "
+"são específicos para a empresa.\" aria-label=\"Os valores atribuídos aqui "
+"são específicos para a empresa.\" groups=\"base.group_multi_company\" "
+"role=\"img\"/>"
+
+#. module: ptplus_issuance_blocking
+#: model_terms:ir.ui.view,arch_db:ptplus_issuance_blocking.res_config_settings_view_form_pt_blocking
+msgid "Block archived records"
+msgstr "Bloquear os registos arquivados"
+
+#. module: ptplus_issuance_blocking
+#: model_terms:ir.ui.view,arch_db:ptplus_issuance_blocking.res_config_settings_view_form_pt_blocking
+msgid "Block document issuance on selected Partners and Products"
+msgstr "Bloquear a emissão de documentos em Parceiros e Produtos selecionados"
+
+#. module: ptplus_issuance_blocking
+#: model_terms:ir.ui.view,arch_db:ptplus_issuance_blocking.res_config_settings_view_form_pt_blocking
+msgid "Block products that are not for sale"
+msgstr "Bloquear produtos que não estão à venda"
+
+#. module: ptplus_issuance_blocking
+#. odoo-python
+#: code:addons/ptplus_issuance_blocking/models/fiscal_document.py:0
+#, python-format
+msgid "Can't issue document. Partner '{}' is archived."
+msgstr "Não é possível emitir o documento. O parceiro '{}' está arquivado."
+
+#. module: ptplus_issuance_blocking
+#. odoo-python
+#: code:addons/ptplus_issuance_blocking/models/fiscal_document.py:0
+#, python-format
+msgid "Can't issue document. Partner '{}' is blocked."
+msgstr "Não é possível emitir o documento. O parceiro '{}' está bloqueado."
+
+#. module: ptplus_issuance_blocking
+#. odoo-python
+#: code:addons/ptplus_issuance_blocking/models/fiscal_document.py:0
+#, python-format
+msgid "Can't issue document. Product '{}' is archived."
+msgstr "Não é possível emitir o documento. O produto '{}' está arquivado."
+
+#. module: ptplus_issuance_blocking
+#. odoo-python
+#: code:addons/ptplus_issuance_blocking/models/fiscal_document.py:0
+#, python-format
+msgid "Can't issue document. Product '{}' is blocked."
+msgstr "Não é possível emitir o documento. O produto '{}' está bloqueado."
+
+#. module: ptplus_issuance_blocking
+#. odoo-python
+#: code:addons/ptplus_issuance_blocking/models/fiscal_document.py:0
+#, python-format
+msgid "Can't issue document. Product '{}' is not for sale."
+msgstr ""
+"Não é possível emitir o documento. O produto '{}' não pode ser vendido."
+
+#. module: ptplus_issuance_blocking
+#: model:ir.model.fields,help:ptplus_issuance_blocking.field_res_partner__l10n_pt_issuance_blocking
+#: model:ir.model.fields,help:ptplus_issuance_blocking.field_res_users__l10n_pt_issuance_blocking
+msgid ""
+"Choose a reason to block fiscal document issuance for this partner or leave "
+"blank to keep it unrestrained."
+msgstr ""
+"Escolha um motivo para bloquear a emissão de documentos fiscais para este "
+"parceiro ou deixe em branco para emitir sem restrições."
+
+#. module: ptplus_issuance_blocking
+#: model:ir.model.fields,help:ptplus_issuance_blocking.field_product_product__l10n_pt_issuance_blocking
+#: model:ir.model.fields,help:ptplus_issuance_blocking.field_product_template__l10n_pt_issuance_blocking
+msgid ""
+"Choose a reason to block fiscal document issuance for this product or leave "
+"blank to keep it unrestrained."
+msgstr ""
+"Escolha um motivo para bloquear a emissão de documentos fiscais para este "
+"produto ou deixe em branco para emitir sem restrições."
+
+#. module: ptplus_issuance_blocking
+#: model:ir.model,name:ptplus_issuance_blocking.model_res_company
+msgid "Companies"
+msgstr "Empresas"
+
+#. module: ptplus_issuance_blocking
+#: model:ir.model,name:ptplus_issuance_blocking.model_res_config_settings
+msgid "Config Settings"
+msgstr "Configurações"
+
+#. module: ptplus_issuance_blocking
+#: model:ir.model,name:ptplus_issuance_blocking.model_res_partner
+msgid "Contact"
+msgstr "Contacto"
+
+#. module: ptplus_issuance_blocking
+#: model:ir.model.fields,field_description:ptplus_issuance_blocking.field_product_product__l10n_pt_issuance_blocking
+#: model:ir.model.fields,field_description:ptplus_issuance_blocking.field_product_template__l10n_pt_issuance_blocking
+#: model:ir.model.fields,field_description:ptplus_issuance_blocking.field_res_company__l10n_pt_issuance_blocking
+#: model:ir.model.fields,field_description:ptplus_issuance_blocking.field_res_config_settings__l10n_pt_issuance_blocking
+#: model:ir.model.fields,field_description:ptplus_issuance_blocking.field_res_partner__l10n_pt_issuance_blocking
+#: model:ir.model.fields,field_description:ptplus_issuance_blocking.field_res_users__l10n_pt_issuance_blocking
+#: model_terms:ir.ui.view,arch_db:ptplus_issuance_blocking.res_config_settings_view_form_pt_blocking
+msgid "Doc. Issuance Blocking"
+msgstr "Bloqueio de Emissão de Doc."
+
+#. module: ptplus_issuance_blocking
+#: model:ir.model.fields,field_description:ptplus_issuance_blocking.field_res_company__l10n_pt_issuance_blocking_archived
+#: model:ir.model.fields,field_description:ptplus_issuance_blocking.field_res_config_settings__l10n_pt_issuance_blocking_archived
+msgid "Doc. Issuance Blocking (Archived)"
+msgstr "Bloqueio de Emissão de Doc. (Arquivado)"
+
+#. module: ptplus_issuance_blocking
+#: model:ir.model.fields,field_description:ptplus_issuance_blocking.field_res_company__l10n_pt_issuance_blocking_sale_not_ok
+#: model:ir.model.fields,field_description:ptplus_issuance_blocking.field_res_config_settings__l10n_pt_issuance_blocking_sale_not_ok
+msgid "Doc. Issuance Blocking (Not for Sale)"
+msgstr "Bloqueio de Emissão de Doc. (Não é para Venda)"
+
+#. module: ptplus_issuance_blocking
+#: model:ir.model,name:ptplus_issuance_blocking.model_fiscal_document
+msgid "Fiscal Document"
+msgstr "Documento Fiscal"
+
+#. module: ptplus_issuance_blocking
+#: model:ir.model.fields.selection,name:ptplus_issuance_blocking.selection__product_template__l10n_pt_issuance_blocking__review
+#: model:ir.model.fields.selection,name:ptplus_issuance_blocking.selection__res_partner__l10n_pt_issuance_blocking__review
+msgid "Needs Review"
+msgstr "Necessita de Revisão"
+
+#. module: ptplus_issuance_blocking
+#: model:ir.model.fields.selection,name:ptplus_issuance_blocking.selection__product_template__l10n_pt_issuance_blocking__obsolete
+#: model:ir.model.fields.selection,name:ptplus_issuance_blocking.selection__res_partner__l10n_pt_issuance_blocking__obsolete
+msgid "Obsolete"
+msgstr "Obsoleto"
+
+#. module: ptplus_issuance_blocking
+#: model:ir.model,name:ptplus_issuance_blocking.model_product_template
+msgid "Product"
+msgstr "Produto"
+
+#. module: ptplus_issuance_blocking
+#: model_terms:ir.ui.view,arch_db:ptplus_issuance_blocking.res_config_settings_view_form_pt_blocking
+msgid ""
+"These configurations will allow you to block document issuance on certain "
+"partners and products."
+msgstr ""
+"Estas configurações permitem bloquear a emissão de documentos em "
+"determinados parceiros e produtos."

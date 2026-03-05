@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_picking_form_pt_ou" model="ir.ui.view">
+        <field name="name">stock.picking.form.pt.ou</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="ptplus_stock.view_picking_form" />
+        <field name="arch" type="xml">
+            <field name="user_id" position="after">
+                <field
+                    name="operating_unit_id"
+                    invisible="True"
+                    groups="!operating_unit.group_multi_operating_unit"
+                />
+            </field>
+            <field name="fiscal_document_type_id" position="attributes">
+                <attribute name="domain">
+                    [
+                        ('source_billing', '=', source_billing), ('section', '=', 'stock'),
+                        ('picking_type_ids', 'in', picking_type_id),
+                        ('operating_unit_id', 'in', (False, operating_unit_id))
+                    ]
+                </attribute>
+            </field>
+        </field>
+    </record>
+</odoo>

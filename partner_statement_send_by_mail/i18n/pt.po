@@ -1,0 +1,155 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* partner_statement_send_by_mail
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 14.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-09-28 20:44+0000\n"
+"PO-Revision-Date: 2023-09-28 21:53+0100\n"
+"Last-Translator: Pedro Castro Silva <pedrocs@exo.pt>\n"
+"Language-Team: \n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"X-Generator: Poedit 3.3.2\n"
+
+#. module: partner_statement_send_by_mail
+#: model:mail.template,body_html:partner_statement_send_by_mail.email_template_partner_activity_statement
+msgid ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"        Dear <t t-out=\"object.name or ''\">Deco Addict</t>,\n"
+"        <br><br>\n"
+"        Please find attached a balance statement,\n"
+"        dated between <t t-out=\"format_date(ctx['date_start']) or ''\">Deco Addict</t> and <t t-out=\"format_date(ctx['date_end']) or ''\">Deco Addict</t>.\n"
+"        <br><br>\n"
+"        If you have any question, do not hesitate to contact us.\n"
+"        <br><br>\n"
+"        Regards,\n"
+"        <t t-if=\"not is_html_empty(user.signature)\">\n"
+"            <br><br>\n"
+"            <t t-out=\"user.signature or ''\">--<br>Mitchell Admin</t>\n"
+"        </t>\n"
+"    </p>\n"
+"</div>\n"
+"        "
+msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"        Caro(a) <t t-out=\"object.name or ''\">Deco Addict</t>,\n"
+"        <br><br>\n"
+"        Enviamos em anexo um extrato de movimentos entre\n"
+"        <t t-out=\"format_date(ctx['date_start']) or ''\">???</t> e <t t-out=\"format_date(ctx['date_end']) or ''\">???</t>.\n"
+"        <br><br>\n"
+"        Caso haja alguma questão, não hesite em contactar-nos.\n"
+"        <br><br>\n"
+"        Cumprimentos,\n"
+"        <t t-if=\"not is_html_empty(user.signature)\">\n"
+"            <br><br>\n"
+"            <t t-out=\"user.signature or ''\">--<br>Mitchell Admin</t>\n"
+"        </t>\n"
+"    </p>\n"
+"</div>\n"
+"        "
+
+#. module: partner_statement_send_by_mail
+#: model:mail.template,body_html:partner_statement_send_by_mail.email_template_partner_outstanding_statement
+msgid ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"        Dear <t t-out=\"object.name or ''\">Deco Addict</t>,\n"
+"        <br><br>\n"
+"        Please find attached an outstanding documents statement,\n"
+"        dated <t t-out=\"format_date(ctx['date_end']) or ''\">Deco Addict</t>.\n"
+"        <br><br>\n"
+"        If you have any question, do not hesitate to contact us.\n"
+"        <br><br>\n"
+"        Regards,\n"
+"        <t t-if=\"not is_html_empty(user.signature)\">\n"
+"            <br><br>\n"
+"            <t t-out=\"user.signature or ''\">--<br>Mitchell Admin</t>\n"
+"        </t>\n"
+"    </p>\n"
+"</div>\n"
+"        "
+msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"        Caro(a) <t t-out=\"object.name or ''\">Deco Addict</t>,\n"
+"        <br><br>\n"
+"         Enviamos em anexo um extrato de documentos pendentes no dia <t t-out=\"format_date(ctx['date_end']) or ''\">???</t>.\n"
+"        <br><br>\n"
+"        Caso haja alguma questão, não hesite em contactar-nos.\n"
+"        <br><br>\n"
+"        Cumprimentos,\n"
+"        <t t-if=\"not is_html_empty(user.signature)\">\n"
+"            <br><br>\n"
+"            <t t-out=\"user.signature or ''\">--<br>Mitchell Admin</t>\n"
+"        </t>\n"
+"    </p>\n"
+"</div>\n"
+"        "
+
+#. module: partner_statement_send_by_mail
+#: model:ir.model,name:partner_statement_send_by_mail.model_activity_statement_wizard
+msgid "Activity Statement Wizard"
+msgstr "Assistente de Extrato de Movimentos"
+
+#. module: partner_statement_send_by_mail
+#: model:mail.template,report_name:partner_statement_send_by_mail.email_template_partner_activity_statement
+#: model:mail.template,subject:partner_statement_send_by_mail.email_template_partner_activity_statement
+msgid "Activity statement"
+msgstr "Extrato de Movimentos"
+
+#. module: partner_statement_send_by_mail
+#. odoo-python
+#: code:addons/partner_statement_send_by_mail/wizards/activity_statement_wizard.py:0
+#: code:addons/partner_statement_send_by_mail/wizards/outstanding_statement_wizard.py:0
+#, python-format
+msgid "Compose Email"
+msgstr "Compor Email"
+
+#. module: partner_statement_send_by_mail
+#: model:ir.model,name:partner_statement_send_by_mail.model_outstanding_statement_wizard
+msgid "Outstanding Statement Wizard"
+msgstr "Assistente de Extrato de Documentos Pendentes"
+
+#. module: partner_statement_send_by_mail
+#: model:mail.template,subject:partner_statement_send_by_mail.email_template_partner_outstanding_statement
+msgid "Outstanding documents"
+msgstr "Documentos pendentes"
+
+#. module: partner_statement_send_by_mail
+#: model:mail.template,report_name:partner_statement_send_by_mail.email_template_partner_outstanding_statement
+msgid "Outstanding documents statement"
+msgstr "Extrato de documentos pendentes"
+
+#. module: partner_statement_send_by_mail
+#: model:mail.template,name:partner_statement_send_by_mail.email_template_partner_activity_statement
+msgid "Partner Activity Statement Report - Send by Email"
+msgstr "Assistente de Extrato de Movimentos - Enviar por Email"
+
+#. module: partner_statement_send_by_mail
+#: model:mail.template,name:partner_statement_send_by_mail.email_template_partner_outstanding_statement
+msgid "Partner Outstanding Statement - Send by Email"
+msgstr "Assistente de Extrato de Documentos Pendentes - Enviar por Email"
+
+#. module: partner_statement_send_by_mail
+#: model_terms:ir.ui.view,arch_db:partner_statement_send_by_mail.statement_common_view
+msgid "Send by Email"
+msgstr "Enviar por Email"
+
+#. module: partner_statement_send_by_mail
+#: model:ir.model,name:partner_statement_send_by_mail.model_statement_common_wizard
+msgid "Statement Reports Common Wizard"
+msgstr "Assistente de Relatórios Comuns de Extrato"
+
+#~ msgid "Display Name"
+#~ msgstr "Nome a Exibir"
+
+#~ msgid "Last Modified on"
+#~ msgstr "Última Modificação em"
