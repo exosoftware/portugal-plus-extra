@@ -7,7 +7,7 @@
 
 {
     "name": "Portugal - Invoice grouped by picking",
-    "version": "18.0.1.1.0",
+    "version": "19.0.1.1.0",
     "license": "LGPL-3",
     "depends": ["account_invoice_report_grouped_by_picking", "ptplus_stock"],
     "author": "EXO Software",

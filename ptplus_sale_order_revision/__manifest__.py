@@ -19,5 +19,5 @@
         "wizard/wizard_order_revision.xml",
     ],
     "demo": [],
-    "installable": False,
+    "installable": True,
 }
