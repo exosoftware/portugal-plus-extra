@@ -1,4 +1,4 @@
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 
 
 class SaleOrder(models.Model):
@@ -6,19 +6,20 @@ class SaleOrder(models.Model):
 
     l10n_pt_revision_name = fields.Char("Revision Name", copy=False, readonly=True)
 
-    _sql_constraints = [
-        (
-            "l10n_pt_revision_name_unique",
-            "unique(l10n_pt_revision_name, company_id)",
-            "Revision Name must be unique per Company.",
-        ),
-    ]
+    _l10n_pt_revision_name_unique = models.Constraint(
+        "UNIQUE (l10n_pt_revision_name, company_id)",
+        "Revision Name must be unique per Company.",
+    )
 
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
         for record in records:
-            if not record.old_revision_ids and not record.l10n_pt_revision_name and record.country_code == "PT":
+            if (
+                not record.old_revision_ids
+                and not record.l10n_pt_revision_name
+                and record.country_code == "PT"
+            ):
                 record.l10n_pt_revision_name = record.name
         return records
 
@@ -29,10 +30,11 @@ class SaleOrder(models.Model):
 
         revision_name = "%s.%02d" % (self.unrevisioned_name, new_rev_number)
         res.update(
-        {
-            "l10n_pt_revision_name": revision_name,
-            "name": revision_name,
-        })
+            {
+                "l10n_pt_revision_name": revision_name,
+                "name": revision_name,
+            }
+        )
 
         return res
 
@@ -41,13 +43,13 @@ class SaleOrder(models.Model):
             return super().create_revision()
 
         return {
-            'type': 'ir.actions.act_window',
-            'name': _('New Order'),
-            'view_type': 'form',
-            'view_mode': 'form',
-            'res_model': 'wizard.order.revision',
-            'target': 'new',
-            'context': {'default_order_id': self.id},
+            "type": "ir.actions.act_window",
+            "name": _("New Order"),
+            "view_type": "form",
+            "view_mode": "form",
+            "res_model": "wizard.order.revision",
+            "target": "new",
+            "context": {"default_order_id": self.id},
         }
 
     def pt_get_fullname(self, lang=False):
@@ -57,4 +59,3 @@ class SaleOrder(models.Model):
 
         # New revision name
         return "{} {}".format(self.pt_get_type_name(lang), self.l10n_pt_revision_name)
-

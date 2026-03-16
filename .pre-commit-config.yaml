@@ -2,7 +2,9 @@ exclude: |
   (?x)
   # NOT INSTALLABLE ADDONS
   ^partner_statement_send_by_mail/|
+  ^ptplus_invoice_grouped_by_picking/|
   ^ptplus_operating_unit/|
+  ^ptplus_sale_advance_payment/|
   ^ptplus_sale_operating_unit/|
   ^ptplus_stock_operating_unit/|
   # END NOT INSTALLABLE ADDONS
