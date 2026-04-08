@@ -11,7 +11,7 @@
     "license": "LGPL-3",
     "depends": ["account_invoice_report_grouped_by_picking", "ptplus_stock"],
     "author": "EXO Software",
-    "website": "https://exo.pt",
+    "website": "https://exosoftware.pt",
     "category": "Extra Tools",
     "data": [
         "views/report_invoice.xml",
