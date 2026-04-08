@@ -2,6 +2,7 @@ exclude: |
   (?x)
   # NOT INSTALLABLE ADDONS
   ^partner_statement_send_by_mail/|
+  ^ptplus_invoice_grouped_by_picking/|
   ^ptplus_operating_unit/|
   ^ptplus_sale_operating_unit/|
   ^ptplus_stock_operating_unit/|
@@ -26,7 +27,7 @@ exclude: |
   # You don't usually want a bot to modify your legal texts
   (LICENSE.*|COPYING.*)
 default_language_version:
-  python: python3
+  python: python3.11
   node: "22.9.0"
 repos:
   - repo: local
