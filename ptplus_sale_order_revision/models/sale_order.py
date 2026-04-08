@@ -7,8 +7,8 @@ class SaleOrder(models.Model):
     l10n_pt_revision_name = fields.Char("Revision Name", copy=False, readonly=True)
 
     _l10n_pt_revision_name_unique = models.Constraint(
-        "UNIQUE (l10n_pt_revision_name, company_id)",
-        "Revision Name must be unique per Company.",
+        "UNIQUE (l10n_pt_revision_name, company_id, fiscal_document_type_id)",
+        "Revision Name must be unique per Company and Document Series.",
     )
 
     @api.model_create_multi
@@ -20,7 +20,9 @@ class SaleOrder(models.Model):
                 and not record.l10n_pt_revision_name
                 and record.country_code == "PT"
             ):
-                record.l10n_pt_revision_name = record.name
+                record.l10n_pt_revision_name = (
+                    record.l10n_pt_order_id.l10n_pt_revision_name or record.name
+                )
         return records
 
     def _get_new_rev_data(self, new_rev_number):

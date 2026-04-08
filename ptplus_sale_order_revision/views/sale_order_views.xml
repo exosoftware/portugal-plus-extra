@@ -3,11 +3,16 @@
     <record id="view_order_form" model="ir.ui.view">
         <field name="name">sale.order.form</field>
         <field name="model">sale.order</field>
-        <field name="inherit_id" ref="sale.view_order_form" />
+        <field name="inherit_id" ref="sale_order_revision.view_order_form" />
         <field name="arch" type="xml">
             <field name="partner_id" position="before">
-                <field name="l10n_pt_revision_name" invisible="country_code != 'PT'"/>
+                <field name="l10n_pt_revision_name" invisible="country_code != 'PT'" />
             </field>
+            <button name="create_revision" position="attributes">
+                <attribute
+                    name="invisible"
+                >state not in ['cancel' ,'sent'] or l10n_pt_order_id</attribute>
+            </button>
         </field>
     </record>
 
@@ -18,8 +23,8 @@
         <field name="inherit_id" ref="sale.view_order_tree" />
         <field name="arch" type="xml">
             <field name="name" position="after">
-                <field name="country_code" column_invisible="True"/>
-                <field name="l10n_pt_revision_name" invisible="country_code != 'PT'"/>
+                <field name="country_code" column_invisible="True" />
+                <field name="l10n_pt_revision_name" invisible="country_code != 'PT'" />
             </field>
         </field>
     </record>
@@ -29,8 +34,8 @@
         <field name="inherit_id" ref="sale.view_quotation_tree" />
         <field name="arch" type="xml">
             <field name="name" position="after">
-                <field name="country_code" column_invisible="True"/>
-                <field name="l10n_pt_revision_name" invisible="country_code != 'PT'"/>
+                <field name="country_code" column_invisible="True" />
+                <field name="l10n_pt_revision_name" invisible="country_code != 'PT'" />
             </field>
         </field>
     </record>
@@ -41,7 +46,7 @@
         <field name="inherit_id" ref="sale.view_sales_order_filter" />
         <field name="arch" type="xml">
             <field name="name" position="before">
-                <field name="l10n_pt_revision_name"/>
+                <field name="l10n_pt_revision_name" />
             </field>
         </field>
     </record>
