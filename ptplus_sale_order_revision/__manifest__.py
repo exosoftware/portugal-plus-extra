@@ -4,7 +4,6 @@
 {
     "name": "Portugal - Sale Order Revision",
     "version": "18.0.1.0.0",
-    "category": "Sale Management",
     "author": "Exo Software",
     "website": "https://exosoftware.pt",
     "license": "AGPL-3",
