@@ -6,10 +6,14 @@ class SaleOrder(models.Model):
 
     l10n_pt_revision_name = fields.Char("Revision Name", copy=False, readonly=True)
 
-    _l10n_pt_revision_name_unique = models.Constraint(
-        "UNIQUE (l10n_pt_revision_name, company_id, fiscal_document_type_id)",
-        "Revision Name must be unique per Company and Document Series.",
-    )
+    # When we have a quotation, and want to confirm it, it is copied,
+    # creating a document with the same name, company and document series,
+    # triggering this constraint. Since the name is controlled by the module only,
+    # we will be removing this constraint for now.
+    # _l10n_pt_revision_name_unique = models.Constraint(
+    #     "UNIQUE (l10n_pt_revision_name, company_id, fiscal_document_type_id)",
+    #     "Revision Name must be unique per Company and Document Series.",
+    # )
 
     @api.model_create_multi
     def create(self, vals_list):
