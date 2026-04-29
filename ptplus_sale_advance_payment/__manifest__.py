@@ -15,5 +15,5 @@
     "data": [],
     "demo": [],
     "auto_install": True,
-    "installable": False,
+    "installable": True,
 }

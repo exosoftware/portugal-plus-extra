@@ -1,4 +1,5 @@
 from odoo import Command, _, models
+from odoo.exceptions import UserError
 
 
 class AccountMove(models.Model):
@@ -6,63 +7,66 @@ class AccountMove(models.Model):
 
     def _post(self, soft=True):
         res = super()._post(soft)
-        if not self.pt_invoicing():
-            return res
 
-        for move in self:
+        for move in res:
+            if not move.pt_invoicing():
+                continue
             sale_orders = move.line_ids.sale_line_ids.order_id
             payments = sale_orders.account_payment_ids.filtered(
                 lambda pay: pay.move_id.state == "posted"
             )
+            print(sale_orders, payments)
             if not sale_orders or not payments:
                 continue
             advance_amount = 0.0
             for pay in payments:
                 advance_amount += pay.currency_id._convert(
                     pay.amount,
-                    self.currency_id,
-                    self.company_id,
-                    self.date or self.invoice_date,
+                    move.currency_id,
+                    move.company_id,
+                    move.date or move.invoice_date,
                 )
 
-            all_category = self.env.ref("product.product_category_all")
-            debit_account_id = all_category.with_company(
-                self.company_id
-            ).property_account_downpayment_categ_id
+            debit_account_id = move.company_id.downpayment_account_id
+            if not debit_account_id:
+                raise UserError(
+                    _("Please set a down payment account in the Sales settings.")
+                )
 
-            credit_account_id = self.partner_id.with_company(
-                self.company_id
+            credit_account_id = move.partner_id.with_company(
+                move.company_id
             ).property_account_receivable_id
 
             line_ids = [
                 Command.create(
                     {
                         "name": _("Downpayments"),
-                        "date_maturity": self.date or self.invoice_date,
+                        "date_maturity": move.date or move.invoice_date,
                         "amount_currency": advance_amount,
-                        "currency_id": self.currency_id.id,
+                        "currency_id": move.currency_id.id,
                         "debit": advance_amount,
-                        "partner_id": self.partner_id.id,
+                        "partner_id": move.partner_id.id,
                         "account_id": debit_account_id.id,
                     }
                 ),
                 Command.create(
                     {
                         "name": _("Downpayments"),
-                        "date_maturity": self.date or self.invoice_date,
+                        "date_maturity": move.date or move.invoice_date,
                         "amount_currency": -advance_amount,
-                        "currency_id": self.currency_id.id,
+                        "currency_id": move.currency_id.id,
                         "credit": advance_amount,
-                        "partner_id": self.partner_id.id,
+                        "partner_id": move.partner_id.id,
                         "account_id": credit_account_id.id,
                     }
                 ),
             ]
 
-            reg_move = self.create(
+            reg_move = self.with_company(move.company_id).create(
                 {
                     "move_type": "entry",
-                    "partner_id": self.partner_id.id,
+                    "company_id": move.company_id.id,
+                    "partner_id": move.partner_id.id,
                     "ref": _(
                         "Regularization of down payments: %s",
                         ", ".join(payments.mapped("name")),
