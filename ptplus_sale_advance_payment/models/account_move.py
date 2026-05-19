@@ -15,7 +15,6 @@ class AccountMove(models.Model):
             payments = sale_orders.account_payment_ids.filtered(
                 lambda pay: pay.move_id.state == "posted"
             )
-            print(sale_orders, payments)
             if not sale_orders or not payments:
                 continue
             advance_amount = 0.0
@@ -75,6 +74,25 @@ class AccountMove(models.Model):
                 }
             )
             reg_move._post()
+
+            # reconcile
+            downpayment_lines = payments.move_id.line_ids.filtered(
+                lambda aml: aml.account_id == debit_account_id and not aml.reconciled
+            )
+            reg_downpayment_line = reg_move.line_ids.filtered(
+                lambda aml: aml.account_id == debit_account_id
+            )
+            if downpayment_lines and reg_downpayment_line:
+                (downpayment_lines + reg_downpayment_line).reconcile()
+
+            reg_receivable_line = reg_move.line_ids.filtered(
+                lambda aml: aml.account_id == credit_account_id
+            )
+            invoice_receivable_lines = move.line_ids.filtered(
+                lambda aml: aml.account_id == credit_account_id and not aml.reconciled
+            )
+            if reg_receivable_line and invoice_receivable_lines:
+                (reg_receivable_line + invoice_receivable_lines).reconcile()
 
             move.message_post(
                 body=_(
