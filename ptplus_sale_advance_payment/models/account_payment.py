@@ -18,6 +18,15 @@ class AccountPayment(models.Model):
                     raise UserError(
                         _("Please set a down payment account in the category 'All'")
                     )
+                if not downpayment_acc.reconcile:
+                    raise UserError(
+                        _(
+                            "The down payment account '%s' must allow "
+                            "reconciliation so advance payments can be applied "
+                            "to invoices.",
+                            downpayment_acc.display_name,
+                        )
+                    )
                 pay.destination_account_id = downpayment_acc
         return res
 
