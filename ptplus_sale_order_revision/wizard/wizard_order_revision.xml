@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <form string="New Order">
                 <field name="invoice_ids" invisible="1" />
+                <field name="has_spreadsheets" invisible="1" />
                 <div class="o_row">
                     <label
                         for="invoices"
@@ -21,6 +22,13 @@
                 <div class="o_row">
                     <label for="chatter" string="Do you want to copy the chatter?" />
                     <field name="chatter" widget="boolean_toggle" />
+                </div>
+                <div class="o_row" invisible="not has_spreadsheets">
+                    <label
+                        for="spreadsheets"
+                        string="Do you want to copy the spreadsheets?"
+                    />
+                    <field name="spreadsheets" widget="boolean_toggle" />
                 </div>
 
                 <footer>

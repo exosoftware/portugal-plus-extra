@@ -3,7 +3,7 @@
 
 {
     "name": "Portugal - Sale Order Revision",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "category": "Sale Management",
     "author": "Exo Software",
     "website": "https://exosoftware.pt",

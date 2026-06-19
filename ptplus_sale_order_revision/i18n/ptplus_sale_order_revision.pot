@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0+e\n"
+"Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-27 09:13+0000\n"
-"PO-Revision-Date: 2025-10-27 09:13+0000\n"
+"POT-Creation-Date: 2026-06-19 14:55+0000\n"
+"PO-Revision-Date: 2026-06-19 14:55+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -48,6 +48,11 @@ msgid "Copy invoices."
 msgstr ""
 
 #. module: ptplus_sale_order_revision
+#: model:ir.model.fields,help:ptplus_sale_order_revision.field_wizard_order_revision__spreadsheets
+msgid "Copy spreadsheets"
+msgstr ""
+
+#. module: ptplus_sale_order_revision
 #: model_terms:ir.ui.view,arch_db:ptplus_sale_order_revision.wizard_order_revision_form
 msgid "Create Order"
 msgstr ""
@@ -63,6 +68,7 @@ msgid "Created on"
 msgstr ""
 
 #. module: ptplus_sale_order_revision
+#: model:ir.model.fields,field_description:ptplus_sale_order_revision.field_sale_order__display_name
 #: model:ir.model.fields,field_description:ptplus_sale_order_revision.field_wizard_order_revision__display_name
 msgid "Display Name"
 msgstr ""
@@ -78,6 +84,12 @@ msgid "Do you want to copy the chatter?"
 msgstr ""
 
 #. module: ptplus_sale_order_revision
+#: model_terms:ir.ui.view,arch_db:ptplus_sale_order_revision.wizard_order_revision_form
+msgid "Do you want to copy the spreadsheets?"
+msgstr ""
+
+#. module: ptplus_sale_order_revision
+#: model:ir.model.fields,field_description:ptplus_sale_order_revision.field_sale_order__id
 #: model:ir.model.fields,field_description:ptplus_sale_order_revision.field_wizard_order_revision__id
 msgid "ID"
 msgstr ""
@@ -127,13 +139,14 @@ msgid "Revision Name"
 msgstr ""
 
 #. module: ptplus_sale_order_revision
-#: model:ir.model.constraint,message:ptplus_sale_order_revision.constraint_sale_order_l10n_pt_revision_name_unique
-msgid "Revision Name must be unique per Company."
+#: model:ir.model,name:ptplus_sale_order_revision.model_sale_order
+#: model:ir.model,website_form_label:ptplus_sale_order_revision.model_sale_order
+msgid "Sales Order"
 msgstr ""
 
 #. module: ptplus_sale_order_revision
-#: model:ir.model,name:ptplus_sale_order_revision.model_sale_order
-msgid "Sales Order"
+#: model:ir.model.fields,field_description:ptplus_sale_order_revision.field_wizard_order_revision__spreadsheets
+msgid "Spreadsheets"
 msgstr ""
 
 #. module: ptplus_sale_order_revision

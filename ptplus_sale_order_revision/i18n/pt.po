@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 18.0+e\n"
+"Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-27 09:13+0000\n"
-"PO-Revision-Date: 2025-10-27 09:15+0000\n"
+"POT-Creation-Date: 2026-06-19 14:55+0000\n"
+"PO-Revision-Date: 2026-06-19 14:55+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pt\n"
@@ -52,6 +52,11 @@ msgid "Copy invoices."
 msgstr "Copiar faturas."
 
 #. module: ptplus_sale_order_revision
+#: model:ir.model.fields,help:ptplus_sale_order_revision.field_wizard_order_revision__spreadsheets
+msgid "Copy spreadsheets"
+msgstr "Copiar as folhas de cálculo"
+
+#. module: ptplus_sale_order_revision
 #: model_terms:ir.ui.view,arch_db:ptplus_sale_order_revision.wizard_order_revision_form
 msgid "Create Order"
 msgstr "Criar Pedido"
@@ -67,6 +72,7 @@ msgid "Created on"
 msgstr "Criado em"
 
 #. module: ptplus_sale_order_revision
+#: model:ir.model.fields,field_description:ptplus_sale_order_revision.field_sale_order__display_name
 #: model:ir.model.fields,field_description:ptplus_sale_order_revision.field_wizard_order_revision__display_name
 msgid "Display Name"
 msgstr "Nome a Exibir"
@@ -82,6 +88,12 @@ msgid "Do you want to copy the chatter?"
 msgstr "Deseja copiar o chatter?"
 
 #. module: ptplus_sale_order_revision
+#: model_terms:ir.ui.view,arch_db:ptplus_sale_order_revision.wizard_order_revision_form
+msgid "Do you want to copy the spreadsheets?"
+msgstr "Deseja copiar as folhas de cálculo?"
+
+#. module: ptplus_sale_order_revision
+#: model:ir.model.fields,field_description:ptplus_sale_order_revision.field_sale_order__id
 #: model:ir.model.fields,field_description:ptplus_sale_order_revision.field_wizard_order_revision__id
 msgid "ID"
 msgstr "ID"
@@ -131,14 +143,15 @@ msgid "Revision Name"
 msgstr "Nome da Revisão"
 
 #. module: ptplus_sale_order_revision
-#: model:ir.model.constraint,message:ptplus_sale_order_revision.constraint_sale_order_l10n_pt_revision_name_unique
-msgid "Revision Name must be unique per Company."
-msgstr "O Nome da Revisão deve ser único por Empresa."
-
-#. module: ptplus_sale_order_revision
 #: model:ir.model,name:ptplus_sale_order_revision.model_sale_order
+#: model:ir.model,website_form_label:ptplus_sale_order_revision.model_sale_order
 msgid "Sales Order"
 msgstr "Pedido de Venda"
+
+#. module: ptplus_sale_order_revision
+#: model:ir.model.fields,field_description:ptplus_sale_order_revision.field_wizard_order_revision__spreadsheets
+msgid "Spreadsheets"
+msgstr "Folhas de cálculo"
 
 #. module: ptplus_sale_order_revision
 #: model:ir.model,name:ptplus_sale_order_revision.model_wizard_order_revision
