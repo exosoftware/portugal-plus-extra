@@ -1,4 +1,4 @@
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 
 
 class WizardOrderRevision(models.TransientModel):
@@ -7,6 +7,8 @@ class WizardOrderRevision(models.TransientModel):
 
     order_id = fields.Many2one("sale.order")
     chatter = fields.Boolean(default=True, help="Copy chatter")
+    spreadsheets = fields.Boolean(default=True, help="Copy spreadsheets")
+    has_spreadsheets = fields.Boolean(compute="_compute_has_spreadsheets")
     invoice_ids = fields.Many2many(
         comodel_name="account.move",
         related="order_id.invoice_ids",
@@ -14,6 +16,14 @@ class WizardOrderRevision(models.TransientModel):
     invoices = fields.Boolean(
         string="Copy Invoices", default=True, help="Copy invoices."
     )
+
+    @api.depends("order_id")
+    def _compute_has_spreadsheets(self):
+        for wizard in self:
+            order = wizard.order_id
+            wizard.has_spreadsheets = bool(
+                "spreadsheet_ids" in order._fields and order.spreadsheet_ids
+            )
 
     def pt_create_revision(self):
         self.ensure_one()
@@ -46,6 +56,17 @@ class WizardOrderRevision(models.TransientModel):
                 invoice.write({"invoice_origin": copied_rec.name})
                 for line in invoice.invoice_line_ids:
                     line.write({"sale_line_ids": [(6, 0, copied_rec.order_line.ids)]})
+
+        # duplicate the spreadsheet
+        if (
+            self.spreadsheets
+            and "spreadsheet_ids" in rec._fields
+            and rec.spreadsheet_ids
+            and not copied_rec.spreadsheet_ids
+        ):
+            copied_rec.spreadsheet_ids = rec.spreadsheet_ids.copy(
+                {"order_id": copied_rec.id}
+            )
 
         msg = _("New revision created: %s") % copied_rec.l10n_pt_revision_name
         copied_rec.message_post(body=msg)
