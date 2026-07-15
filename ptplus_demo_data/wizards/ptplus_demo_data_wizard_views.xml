@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_ptplus_demo_data_wizard_form" model="ir.ui.view">
+        <field name="name">ptplus.demo.data.wizard.form</field>
+        <field name="model">ptplus.demo.data.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group string="Empresa">
+                            <field name="company_name" />
+                            <field name="vat" />
+                            <field name="sector" />
+                            <field name="country_id" />
+                            <field name="currency_id" />
+                            <field name="employee_count" />
+                        </group>
+                        <group string="Contactos">
+                            <field name="street" />
+                            <field name="city" />
+                            <field name="zip" />
+                            <field name="phone" />
+                            <field name="email" />
+                            <field name="website" />
+                        </group>
+                    </group>
+                    <group string="Apps a Popular">
+                        <group>
+                            <field name="generate_fiscal_documents" />
+                            <field name="generate_crm" />
+                            <field name="generate_voip" />
+                            <field name="generate_sales" />
+                            <field name="generate_project" />
+                            <field name="generate_timesheets" />
+                            <field name="generate_planning" />
+                        </group>
+                        <group>
+                            <field name="generate_milestone_invoicing" />
+                            <field name="generate_payroll" />
+                            <field name="generate_email_marketing" />
+                            <field name="generate_sms" />
+                            <field name="generate_whatsapp" />
+                            <field name="generate_marketing_automation" />
+                            <field name="generate_helpdesk" />
+                        </group>
+                    </group>
+                    <field
+                        name="result_log"
+                        readonly="1"
+                        invisible="not result_log"
+                        widget="text"
+                    />
+                </sheet>
+                <footer>
+                    <button
+                        name="action_generate_demo_data"
+                        type="object"
+                        string="Gerar Dados Demo"
+                        class="btn-primary"
+                    />
+                    <button string="Fechar" class="btn-secondary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ptplus_demo_data_wizard" model="ir.actions.act_window">
+        <field name="name">Gerar Dados Demo PT+</field>
+        <field name="res_model">ptplus.demo.data.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem
+        id="menu_ptplus_demo_data_wizard"
+        name="PT+ Demo Data"
+        parent="base.menu_administration"
+        action="action_ptplus_demo_data_wizard"
+        groups="base.group_system"
+        sequence="100"
+    />
+</odoo>
