@@ -143,10 +143,14 @@ class PtplusDemoDataWizard(models.TransientModel):
                 }
             )
         tickets = [
-            (_("Fissura na parede - necessita vistoria"), "2"),
             (_("Pedido de esclarecimento sobre orçamento"), "0"),
-            (_("Atraso na entrega de materiais"), "1"),
+            (_("Pedido de fatura duplicada"), "0"),
         ]
+        if self._demo_is_civil_engineering():
+            tickets += [
+                (_("Fissura na parede - necessita vistoria"), "2"),
+                (_("Atraso na entrega de materiais"), "1"),
+            ]
         for name, priority in tickets:
             self.env["helpdesk.ticket"].create(
                 {

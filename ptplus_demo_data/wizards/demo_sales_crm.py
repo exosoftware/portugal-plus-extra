@@ -22,21 +22,32 @@ class PtplusDemoDataWizard(models.TransientModel):
             "won": self.env.ref("crm.stage_lead4", raise_if_not_found=False),
         }
         opportunities = [
-            (_("Projeto de Engenharia - Edifício Sede"), 45000.0, stages["new"], 20),
-            (
-                _("Fiscalização de Obra - Parque Industrial"),
-                28000.0,
-                stages["qualified"],
-                40,
-            ),
-            (
-                _("Consultoria Técnica - Ampliação de Fábrica"),
-                15000.0,
-                stages["proposition"],
-                70,
-            ),
-            (_("Licenciamento - Loteamento Urbano"), 9000.0, stages["won"], 100),
+            (_("Proposta Comercial - Novo Cliente"), 12000.0, stages["new"], 20),
+            (_("Renovação de Contrato Anual"), 8000.0, stages["qualified"], 40),
+            (_("Serviço de Consultoria - Fase 2"), 15000.0, stages["proposition"], 70),
+            (_("Parceria Estratégica"), 6000.0, stages["won"], 100),
         ]
+        if self._demo_is_civil_engineering():
+            opportunities += [
+                (
+                    _("Projeto de Engenharia - Edifício Sede"),
+                    45000.0,
+                    stages["new"],
+                    20,
+                ),
+                (
+                    _("Fiscalização de Obra - Parque Industrial"),
+                    28000.0,
+                    stages["qualified"],
+                    40,
+                ),
+                (
+                    _("Licenciamento - Loteamento Urbano"),
+                    9000.0,
+                    stages["proposition"],
+                    60,
+                ),
+            ]
         for name, revenue, stage, probability in opportunities:
             lead = self.env["crm.lead"].create(
                 {
@@ -80,14 +91,17 @@ class PtplusDemoDataWizard(models.TransientModel):
         """Quotation template with lines, applied to a new quotation."""
         log = []
         service = self._demo_get_or_create_product(
-            company, _("Serviços de Consultoria Técnica"), 850.0, False
+            company, _("Serviços de Consultoria"), 850.0, False
         )
         material = self._demo_get_or_create_product(
-            company, _("Materiais de Construção"), 120.0, True
+            company,
+            self._demo_sector_name(_("Bens Diversos"), _("Materiais de Construção")),
+            120.0,
+            True,
         )
         template = self.env["sale.order.template"].create(
             {
-                "name": _("Proposta Padrão - Engenharia Civil"),
+                "name": _("Proposta Padrão"),
                 "company_id": company.id,
                 "sale_order_template_line_ids": [
                     Command.create(

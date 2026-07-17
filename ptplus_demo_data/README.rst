@@ -1,6 +1,6 @@
-
-Portugal - Invoice grouped by picking
-=====================================
+=============================
+Portugal - Demo Data Generator
+=============================
 
 Populate a company with realistic cross-app demo data for PT+ presentations
 and sales demos: Portuguese fiscal localization (quotation, order, worksheet,
@@ -9,13 +9,6 @@ tax), CRM, VoIP, Sales (quotation templates), Project & Tasks (with a
 Documents folder structure), Timesheets, Planning, Milestone invoicing,
 Payroll, Email Marketing, SMS, WhatsApp, Marketing Automation and Helpdesk.
 
-
-
-Installation
-============
-
-Just do it.
-
 Usage
 =====
 
@@ -23,23 +16,12 @@ Settings > Technical > PT+ Demo Data > Generate Demo Data. Fill in the
 company name, sector and the apps to populate, then click *Generate Demo
 Data*.
 
-Credits
-========
+Changelog
+=========
 
-Contributors
-------------
+19.0.1.0.0 (2026-07-15)
+------------------------
 
-* `Exo Software <https://exosoftware.pt>`_:
+**Features**
 
-  * Pedro Castro Silva
-  * Diogo Pereira
-  * João Costa
-
-Maintainer
-----------
-
-.. image:: https://exo.pt/logo.png
-   :alt: Exo
-   :target: https://exo.pt
-
-This module is maintained by Exo Software, lda.
+* Initial version.

@@ -4,6 +4,7 @@
 #
 ##############################################################################
 import base64
+import random
 from datetime import timedelta
 
 from odoo import _, fields, models
@@ -14,7 +15,7 @@ class PtplusDemoDataWizard(models.TransientModel):
     _inherit = "ptplus.demo.data.wizard"
 
     def _demo_get_or_create_project(self, company):
-        name = _("Obra - %s") % company.name
+        name = self._demo_sector_name(_("Projeto"), _("Obra")) + " - " + company.name
         project = self.env["project.project"].search(
             [("name", "=", name), ("company_id", "=", company.id)], limit=1
         )
@@ -38,7 +39,9 @@ class PtplusDemoDataWizard(models.TransientModel):
                 {
                     "name": name,
                     "company_id": company.id,
-                    "job_title": _("Engenheiro Civil"),
+                    "job_title": self._demo_sector_name(
+                        _("Consultor"), _("Engenheiro Civil")
+                    ),
                 }
             )
         # Linking the demo employee to the acting user means the timesheets/
@@ -95,21 +98,15 @@ class PtplusDemoDataWizard(models.TransientModel):
         documents_data = [
             (
                 _("Técnico"),
-                "Memoria_Descritiva.txt",
+                "Especificacao_Tecnica.txt",
                 _("A Enviar"),
-                "Memória descritiva do projeto.",
-            ),
-            (
-                _("Técnico"),
-                "Projeto_de_Execucao.txt",
-                _("Enviado"),
-                "Projeto de execução.",
+                "Especificação técnica do projeto.",
             ),
             (
                 _("Financeiro"),
-                "Orcamento_Obra.txt",
+                "Orcamento_do_Projeto.txt",
                 _("Aprovado"),
-                "Orçamento detalhado da obra.",
+                "Orçamento detalhado do projeto.",
             ),
             (
                 _("Comercial"),
@@ -118,6 +115,27 @@ class PtplusDemoDataWizard(models.TransientModel):
                 "Proposta comercial enviada ao cliente.",
             ),
         ]
+        if self._demo_is_civil_engineering():
+            documents_data += [
+                (
+                    _("Técnico"),
+                    "Memoria_Descritiva.txt",
+                    _("A Enviar"),
+                    "Memória descritiva do projeto.",
+                ),
+                (
+                    _("Técnico"),
+                    "Projeto_de_Execucao.txt",
+                    _("Enviado"),
+                    "Projeto de execução.",
+                ),
+                (
+                    _("Financeiro"),
+                    "Orcamento_Obra.txt",
+                    _("Aprovado"),
+                    "Orçamento detalhado da obra.",
+                ),
+            ]
         for dept, filename, status, content in documents_data:
             self.env["documents.document"].create(
                 {
@@ -135,20 +153,36 @@ class PtplusDemoDataWizard(models.TransientModel):
             )
         log.append(
             _(
-                "Pasta de documentos do projeto criada com 3 departamentos e 4 documentos"
+                "Pasta de documentos do projeto criada com 3 departamentos e %s documentos"
             )
+            % len(documents_data)
         )
 
-        topics = [_("Estrutura"), _("Fundações"), _("Acabamentos"), _("Licenciamento")]
-        topic_tags = {
-            t: self._demo_get_or_create_tag("project.tags", t) for t in topics
-        }
         tasks_data = [
-            (_("Levantamento Topográfico"), topics[0], "1_done"),
-            (_("Cálculo de Fundações"), topics[1], "01_in_progress"),
-            (_("Acabamentos Interiores"), topics[2], "04_waiting_normal"),
-            (_("Licenciamento Camarário"), topics[3], "02_changes_requested"),
+            (_("Planeamento"), _("Planeamento"), "1_done"),
+            (_("Execução"), _("Execução"), "01_in_progress"),
+            (
+                _("Controlo de Qualidade"),
+                _("Controlo de Qualidade"),
+                "04_waiting_normal",
+            ),
+            (_("Entrega Final"), _("Entrega"), "02_changes_requested"),
         ]
+        if self._demo_is_civil_engineering():
+            tasks_data += [
+                (_("Levantamento Topográfico"), _("Estrutura"), "1_done"),
+                (_("Cálculo de Fundações"), _("Fundações"), "01_in_progress"),
+                (_("Acabamentos Interiores"), _("Acabamentos"), "04_waiting_normal"),
+                (
+                    _("Licenciamento Camarário"),
+                    _("Licenciamento"),
+                    "02_changes_requested",
+                ),
+            ]
+        topic_tags = {
+            topic: self._demo_get_or_create_tag("project.tags", topic)
+            for _, topic, _ in tasks_data
+        }
         for name, topic, state in tasks_data:
             self.env["project.task"].create(
                 {
@@ -160,7 +194,7 @@ class PtplusDemoDataWizard(models.TransientModel):
                     "state": state,
                 }
             )
-        log.append(_("4 tarefas criadas, uma por tópico da obra"))
+        log.append(_("%s tarefas criadas, uma por tópico") % len(tasks_data))
         return log
 
     def _demo_generate_timesheets(self, company, partner):
@@ -168,12 +202,31 @@ class PtplusDemoDataWizard(models.TransientModel):
         project = self._demo_get_or_create_project(company)
         employee = self._demo_get_or_create_employee(company)
         tasks = self.env["project.task"].search([("project_id", "=", project.id)])
+        if not tasks:
+            return log
         hour_uom = self.env.ref("uom.product_uom_hour")
         today = fields.Date.context_today(self)
-        hours_by_day = [8.0, 6.5, 4.0]
+        # Every weekday (Mon-Fri) of the previous ISO week, plus every
+        # weekday of the current week up to today -- anchored on actual
+        # week boundaries so the previous week is always fully covered,
+        # regardless of which weekday "today" falls on.
+        this_monday = today - timedelta(days=today.weekday())
+        previous_monday = this_monday - timedelta(days=7)
+        dates = [
+            previous_monday + timedelta(days=i)
+            for i in range((today - previous_monday).days + 1)
+            if (previous_monday + timedelta(days=i)).weekday() < 5
+        ]
         count = 0
-        for task in tasks:
-            for day_offset, hours in enumerate(hours_by_day):
+        for idx, date in enumerate(dates):
+            total_hours = round(random.uniform(3.0, 9.0) * 2) / 2
+            if len(tasks) > 1 and random.random() < 0.4:
+                task_a, task_b = random.sample(list(tasks), 2)
+                hours_a = round(random.uniform(1.5, total_hours - 1.5) * 2) / 2
+                day_entries = [(task_a, hours_a), (task_b, total_hours - hours_a)]
+            else:
+                day_entries = [(tasks[idx % len(tasks)], total_hours)]
+            for task, hours in day_entries:
                 self.env["account.analytic.line"].create(
                     {
                         "name": _("Trabalho realizado"),
@@ -182,13 +235,13 @@ class PtplusDemoDataWizard(models.TransientModel):
                         "task_id": task.id,
                         "product_uom_id": hour_uom.id,
                         "unit_amount": hours,
-                        "date": today - timedelta(days=day_offset),
+                        "date": date,
                     }
                 )
                 count += 1
         log.append(
-            _("Registo de horas criado: %s lançamentos em %s tarefa(s)")
-            % (count, len(tasks))
+            _("Registo de horas criado: %s lançamentos em %s dias úteis")
+            % (count, len(dates))
         )
         return log
 
@@ -196,7 +249,10 @@ class PtplusDemoDataWizard(models.TransientModel):
         log = []
         project = self._demo_get_or_create_project(company)
         employee = self._demo_get_or_create_employee(company)
-        role = self._demo_get_or_create_tag("planning.role", _("Engenheiro Civil"))
+        role = self._demo_get_or_create_tag(
+            "planning.role",
+            self._demo_sector_name(_("Consultor"), _("Engenheiro Civil")),
+        )
         start = fields.Datetime.now()
         self.env["planning.slot"].create(
             {
@@ -239,7 +295,9 @@ class PtplusDemoDataWizard(models.TransientModel):
 
         milestone = self.env["project.milestone"].create(
             {
-                "name": _("Entrega do Projeto de Execução"),
+                "name": self._demo_sector_name(
+                    _("Entrega Final do Projeto"), _("Entrega do Projeto de Execução")
+                ),
                 "project_id": project.id,
                 "sale_line_id": line.id,
                 "deadline": fields.Date.add(fields.Date.context_today(self), days=30),

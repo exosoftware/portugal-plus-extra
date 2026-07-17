@@ -91,6 +91,25 @@ class PtplusDemoDataWizard(models.TransientModel):
         }
         return self.env["product.template"].create(vals)
 
+    def _demo_get_na_tax(self, company):
+        """The "N/A" tax (l10n_pt_genre='NS', Non Applicable).
+
+        Every invoiced line should carry a tax, even a 0%/not-applicable
+        one, for it to read as complete on the invoice -- but a genre='ECO'
+        product line doesn't need (and, being taxed at 0% with no
+        exemption reason, wouldn't pass _pt_check_line_taxes as) a VAT
+        tax. "N/A" is genre='NS', not 'IVA', so it's exempt from that
+        exemption-reason requirement.
+        """
+        return self.env["account.tax"].search(
+            [
+                ("company_id", "=", company.id),
+                ("type_tax_use", "=", "sale"),
+                ("l10n_pt_genre", "=", "NS"),
+            ],
+            limit=1,
+        )
+
     def _demo_get_or_create_eco_tax_product(self, company):
         """A product line for the environmental (eco) fee itself.
 
@@ -115,7 +134,7 @@ class PtplusDemoDataWizard(models.TransientModel):
                 "company_id": company.id,
                 "l10n_pt_genre": "ECO",
                 "l10n_pt_eco_tax_type": "electr",
-                "taxes_id": [Command.set([])],
+                "taxes_id": [Command.set(self._demo_get_na_tax(company).ids)],
             }
         )
 
@@ -128,7 +147,7 @@ class PtplusDemoDataWizard(models.TransientModel):
         )
         location = self.env["stock.location"].search(
             [
-                ("name", "=", "Equipamento em Obra"),
+                ("name", "=", "Depósito Externo"),
                 ("location_id", "=", warehouse.view_location_id.id),
             ],
             limit=1,
@@ -136,7 +155,7 @@ class PtplusDemoDataWizard(models.TransientModel):
         if not location:
             location = self.env["stock.location"].create(
                 {
-                    "name": "Equipamento em Obra",
+                    "name": "Depósito Externo",
                     "usage": "internal",
                     "location_id": warehouse.view_location_id.id,
                     "company_id": company.id,
@@ -177,10 +196,13 @@ class PtplusDemoDataWizard(models.TransientModel):
     def _demo_generate_fiscal_documents(self, company, partner):
         log = []
         service = self._demo_get_or_create_product(
-            company, _("Serviços de Consultoria Técnica"), 850.0, False
+            company, _("Serviços de Consultoria"), 850.0, False
         )
         material = self._demo_get_or_create_product(
-            company, _("Materiais de Construção"), 120.0, True
+            company,
+            self._demo_sector_name(_("Bens Diversos"), _("Materiais de Construção")),
+            120.0,
+            True,
         )
         equipment = self._demo_get_or_create_product(
             company, _("Equipamento Elétrico"), 300.0, True
@@ -347,7 +369,7 @@ class PtplusDemoDataWizard(models.TransientModel):
                             "quantity": 3,
                             "price_unit": eco_tax_product.list_price,
                             "account_id": income_account.id,
-                            "tax_ids": [Command.set([])],
+                            "tax_ids": [Command.set(eco_tax_product.taxes_id.ids)],
                         }
                     ),
                 ],

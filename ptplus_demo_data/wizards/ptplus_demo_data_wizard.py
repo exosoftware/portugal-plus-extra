@@ -10,6 +10,14 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
+# Sector selection codes -- referenced from the other wizard files (via
+# `self.sector == SECTOR_ENGENHARIA_CIVIL`) to gate sector-specific extras.
+SECTOR_ENGENHARIA_CIVIL = "engenharia_civil"
+
+SECTORS = [
+    (SECTOR_ENGENHARIA_CIVIL, "Engenharia Civil"),
+]
+
 
 class PtplusDemoDataWizard(models.TransientModel):
     _name = "ptplus.demo.data.wizard"
@@ -17,7 +25,7 @@ class PtplusDemoDataWizard(models.TransientModel):
 
     company_name = fields.Char(required=True)
     vat = fields.Char(string="NIF")
-    sector = fields.Char(string="Sector de Atividade")
+    sector = fields.Selection(SECTORS, string="Sector de Atividade", required=True)
     street = fields.Char()
     city = fields.Char()
     zip = fields.Char(string="ZIP")
@@ -95,15 +103,13 @@ class PtplusDemoDataWizard(models.TransientModel):
             .with_context(chart_template_load=True)
             .create(self._demo_company_vals())
         )
-        if self.sector:
-            industry = self.env["res.partner.industry"].search(
-                [("name", "=", self.sector)], limit=1
-            )
-            if not industry:
-                industry = self.env["res.partner.industry"].create(
-                    {"name": self.sector}
-                )
-            company.partner_id.industry_id = industry
+        sector_label = dict(self._fields["sector"].selection).get(self.sector)
+        industry = self.env["res.partner.industry"].search(
+            [("name", "=", sector_label)], limit=1
+        )
+        if not industry:
+            industry = self.env["res.partner.industry"].create({"name": sector_label})
+        company.partner_id.industry_id = industry
         return company
 
     def _demo_create_warehouse(self, company):
@@ -159,6 +165,20 @@ class PtplusDemoDataWizard(models.TransientModel):
         # username or password."). "delayed" just flags elements as
         # "needed" for a cron to pick up later, with no live call.
         company.l10n_pt_saft_computing_method = "delayed"
+
+    def _demo_is_civil_engineering(self):
+        return self.sector == SECTOR_ENGENHARIA_CIVIL
+
+    def _demo_sector_name(self, generic, civil_engineering):
+        """Pick a label depending on the company's sector.
+
+        Used for records that always get created (one is mandatory) but
+        whose wording should only look sector-specific when it actually
+        matches -- as opposed to additional records that only exist for a
+        given sector at all (those are gated with _demo_is_civil_engineering
+        directly in each generator method).
+        """
+        return civil_engineering if self._demo_is_civil_engineering() else generic
 
     def _demo_create_partner(self, company):
         """A single customer partner used across the generated documents."""
@@ -223,15 +243,26 @@ class PtplusDemoDataWizard(models.TransientModel):
             ),
             (self.generate_helpdesk, demo._demo_generate_helpdesk),
         ]
+        # All-or-nothing: any step failing must abort the whole thing (no
+        # company, no partial data) and surface a clear error, rather than
+        # silently skipping that step and leaving an inconsistent demo
+        # company behind.
         for enabled, step in steps:
             if not enabled:
                 continue
             try:
-                with self.env.cr.savepoint():
-                    log.extend(step(company, partner) or [])
+                log.extend(step(company, partner) or [])
+            except UserError:
+                raise
             except Exception as exc:  # noqa: BLE001
                 _logger.exception("PT+ demo data step %s failed", step.__name__)
-                log.append(_("%s failed: %s") % (step.__name__, exc))
+                raise UserError(
+                    _(
+                        "Demo data generation failed at step '%(step)s': "
+                        "%(error)s\n\nNothing was created."
+                    )
+                    % {"step": step.__name__, "error": exc}
+                ) from exc
 
         self.result_log = "\n".join(log)
         return {
