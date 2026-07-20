@@ -4,3 +4,4 @@ from . import demo_sales_crm
 from . import demo_project
 from . import demo_hr
 from . import demo_marketing
+from . import demo_accounting

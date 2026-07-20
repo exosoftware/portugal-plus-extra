@@ -27,6 +27,7 @@
         "sale_project_forecast",
         "documents_project",
         "hr_payroll",
+        "hr_holidays",
         "mass_mailing_sms",
         "marketing_automation",
         "whatsapp",

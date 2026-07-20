@@ -57,6 +57,9 @@ class PtplusDemoDataWizard(models.TransientModel):
         string="Faturação por Milestones", default=True
     )
     generate_payroll = fields.Boolean(string="Salários", default=True)
+    generate_accounting = fields.Boolean(
+        string="Contabilidade (Faturas e Extrato Bancário)", default=True
+    )
     generate_email_marketing = fields.Boolean(string="Email Marketing", default=True)
     generate_sms = fields.Boolean(string="SMS", default=True)
     generate_whatsapp = fields.Boolean(string="WhatsApp", default=True)
@@ -225,8 +228,14 @@ class PtplusDemoDataWizard(models.TransientModel):
             (self.generate_fiscal_documents, demo._demo_generate_fiscal_documents),
             (self.generate_crm, demo._demo_generate_crm),
             (self.generate_voip, demo._demo_generate_voip),
-            (self.generate_sales, demo._demo_generate_sales),
+            # project must run before sales: 3 of the 6 new service products
+            # reference the project it creates (service_tracking =
+            # 'task_global_project' needs an *existing* project to point at).
             (self.generate_project, demo._demo_generate_project),
+            (self.generate_sales, demo._demo_generate_sales),
+            # timesheets must run after project/sales: it covers every task
+            # that exists by this point, including ones sales-confirmation
+            # just created via service_tracking.
             (self.generate_timesheets, demo._demo_generate_timesheets),
             (self.generate_planning, demo._demo_generate_planning),
             (
@@ -234,6 +243,7 @@ class PtplusDemoDataWizard(models.TransientModel):
                 demo._demo_generate_milestone_invoicing,
             ),
             (self.generate_payroll, demo._demo_generate_payroll),
+            (self.generate_accounting, demo._demo_generate_accounting),
             (self.generate_email_marketing, demo._demo_generate_email_marketing),
             (self.generate_sms, demo._demo_generate_sms),
             (self.generate_whatsapp, demo._demo_generate_whatsapp),

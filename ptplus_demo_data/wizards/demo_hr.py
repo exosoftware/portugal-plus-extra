@@ -11,7 +11,7 @@ class PtplusDemoDataWizard(models.TransientModel):
 
     def _demo_generate_payroll(self, company, partner):
         log = []
-        employee = self._demo_get_or_create_employee(company)
+        employee = self._demo_get_or_create_employee_roster(company)[:1]
 
         structure_type = self.env["hr.payroll.structure.type"].search(
             [("name", "=", _("Salário Mensal PT"))], limit=1

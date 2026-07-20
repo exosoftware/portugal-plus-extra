@@ -29,27 +29,78 @@ class PtplusDemoDataWizard(models.TransientModel):
             }
         )
 
-    def _demo_get_or_create_employee(self, company):
-        name = _("Colaborador Demo")
-        employee = self.env["hr.employee"].search(
-            [("name", "=", name), ("company_id", "=", company.id)], limit=1
+    def _demo_get_or_create_employee_roster(self, company):
+        """10 employees across 3 departments, 2 hierarchy levels.
+
+        1 top-level manager + 1 department manager per department (reporting
+        to the top manager) + 2 regular employees per department (reporting
+        to their department manager) = 1 + 3 + 6 = 10, so the org chart shows
+        both levels.
+        """
+        existing = self.env["hr.employee"].search([("company_id", "=", company.id)])
+        if len(existing) >= 10:
+            return existing
+
+        top_manager = self.env["hr.employee"].search(
+            [("name", "=", _("Diretor Geral")), ("company_id", "=", company.id)],
+            limit=1,
         )
-        if not employee:
-            employee = self.env["hr.employee"].create(
+        if not top_manager:
+            top_manager = self.env["hr.employee"].create(
                 {
-                    "name": name,
+                    "name": _("Diretor Geral"),
                     "company_id": company.id,
-                    "job_title": self._demo_sector_name(
-                        _("Consultor"), _("Engenheiro Civil")
-                    ),
+                    "job_title": _("Diretor Geral"),
                 }
             )
-        # Linking the demo employee to the acting user means the timesheets/
-        # tasks generated for it show up under "My Timesheets"/"My Tasks"
-        # without the user having to clear the default filter.
-        if not employee.user_id:
-            employee.user_id = self.env.uid
-        return employee
+        # Linking to the acting user means the timesheets/tasks/planning
+        # generated for this roster show up under "My Timesheets"/"My
+        # Tasks" without having to clear the default filter.
+        if not top_manager.user_id:
+            top_manager.user_id = self.env.uid
+
+        roster = top_manager
+        for dept_name in [_("Técnico"), _("Financeiro"), _("Comercial")]:
+            department = self.env["hr.department"].search(
+                [("name", "=", dept_name), ("company_id", "=", company.id)], limit=1
+            )
+            if not department:
+                manager = self.env["hr.employee"].create(
+                    {
+                        "name": _("Responsável de %s") % dept_name,
+                        "company_id": company.id,
+                        "job_title": _("Responsável de Departamento"),
+                        "parent_id": top_manager.id,
+                    }
+                )
+                department = self.env["hr.department"].create(
+                    {
+                        "name": dept_name,
+                        "company_id": company.id,
+                        "manager_id": manager.id,
+                    }
+                )
+                manager.department_id = department.id
+            roster |= department.manager_id
+            for i in range(1, 3):
+                emp_name = _("%s - Colaborador %s") % (dept_name, i)
+                employee = self.env["hr.employee"].search(
+                    [("name", "=", emp_name), ("company_id", "=", company.id)], limit=1
+                )
+                if not employee:
+                    employee = self.env["hr.employee"].create(
+                        {
+                            "name": emp_name,
+                            "company_id": company.id,
+                            "department_id": department.id,
+                            "parent_id": department.manager_id.id,
+                            "job_title": self._demo_sector_name(
+                                _("Consultor"), _("Engenheiro Civil")
+                            ),
+                        }
+                    )
+                roster |= employee
+        return roster
 
     def _demo_get_or_create_tag(self, model, name):
         tag = self.env[model].search([("name", "=", name)], limit=1)
@@ -199,9 +250,8 @@ class PtplusDemoDataWizard(models.TransientModel):
 
     def _demo_generate_timesheets(self, company, partner):
         log = []
-        project = self._demo_get_or_create_project(company)
-        employee = self._demo_get_or_create_employee(company)
-        tasks = self.env["project.task"].search([("project_id", "=", project.id)])
+        roster = list(self._demo_get_or_create_employee_roster(company))
+        tasks = self.env["project.task"].search([("company_id", "=", company.id)])
         if not tasks:
             return log
         hour_uom = self.env.ref("uom.product_uom_hour")
@@ -212,26 +262,27 @@ class PtplusDemoDataWizard(models.TransientModel):
         # regardless of which weekday "today" falls on.
         this_monday = today - timedelta(days=today.weekday())
         previous_monday = this_monday - timedelta(days=7)
-        dates = [
+        weekdays = [
             previous_monday + timedelta(days=i)
             for i in range((today - previous_monday).days + 1)
             if (previous_monday + timedelta(days=i)).weekday() < 5
         ]
         count = 0
-        for idx, date in enumerate(dates):
-            total_hours = round(random.uniform(3.0, 9.0) * 2) / 2
-            if len(tasks) > 1 and random.random() < 0.4:
-                task_a, task_b = random.sample(list(tasks), 2)
-                hours_a = round(random.uniform(1.5, total_hours - 1.5) * 2) / 2
-                day_entries = [(task_a, hours_a), (task_b, total_hours - hours_a)]
-            else:
-                day_entries = [(tasks[idx % len(tasks)], total_hours)]
-            for task, hours in day_entries:
+        for task in tasks:
+            entry_count = random.randint(3, 5)
+            task_employees = random.sample(roster, min(len(roster), entry_count))
+            while len(task_employees) < entry_count:
+                task_employees.append(random.choice(roster))
+            task_dates = random.sample(weekdays, min(len(weekdays), entry_count))
+            while len(task_dates) < entry_count:
+                task_dates.append(random.choice(weekdays))
+            for employee, date in zip(task_employees, task_dates):
+                hours = round(random.uniform(1.0, 6.0) * 2) / 2
                 self.env["account.analytic.line"].create(
                     {
                         "name": _("Trabalho realizado"),
                         "employee_id": employee.id,
-                        "project_id": project.id,
+                        "project_id": task.project_id.id,
                         "task_id": task.id,
                         "product_uom_id": hour_uom.id,
                         "unit_amount": hours,
@@ -240,31 +291,89 @@ class PtplusDemoDataWizard(models.TransientModel):
                 )
                 count += 1
         log.append(
-            _("Registo de horas criado: %s lançamentos em %s dias úteis")
-            % (count, len(dates))
+            _("Registo de horas criado: %s lançamentos em %s tarefas")
+            % (count, len(tasks))
         )
         return log
 
     def _demo_generate_planning(self, company, partner):
         log = []
         project = self._demo_get_or_create_project(company)
-        employee = self._demo_get_or_create_employee(company)
+        roster = self._demo_get_or_create_employee_roster(company)
         role = self._demo_get_or_create_tag(
             "planning.role",
             self._demo_sector_name(_("Consultor"), _("Engenheiro Civil")),
         )
         start = fields.Datetime.now()
-        self.env["planning.slot"].create(
-            {
-                "resource_id": employee.resource_id.id,
-                "role_id": role.id,
-                "project_id": project.id,
-                "start_datetime": start,
-                "end_datetime": start + timedelta(hours=8),
-                "company_id": company.id,
-            }
+        end = start + timedelta(days=31)
+        for employee in roster:
+            self.env["planning.slot"].create(
+                {
+                    "resource_id": employee.resource_id.id,
+                    "role_id": role.id,
+                    "project_id": project.id,
+                    "start_datetime": start,
+                    "end_datetime": end,
+                    "company_id": company.id,
+                }
+            )
+        log.append(
+            _("%s turnos de planeamento criados (1 mês cada, um por colaborador)")
+            % len(roster)
         )
-        log.append(_("Turno de planeamento criado para %s") % employee.name)
+        log += self._demo_generate_time_off(company, roster)
+        return log
+
+    def _demo_generate_time_off(self, company, roster):
+        log = []
+        leave_type = self.env["hr.leave.type"].search(
+            [("name", "=", _("Férias")), ("company_id", "in", [company.id, False])],
+            limit=1,
+        )
+        if not leave_type:
+            leave_type = self.env["hr.leave.type"].create(
+                {
+                    "name": _("Férias"),
+                    "company_id": company.id,
+                    "time_type": "leave",
+                    "requires_allocation": True,
+                    "request_unit": "day",
+                    "allocation_validation_type": "hr",
+                    "leave_validation_type": "hr",
+                }
+            )
+        today = fields.Date.context_today(self)
+        year_start = today.replace(month=1, day=1)
+        for employee in roster:
+            allocation = self.env["hr.leave.allocation"].create(
+                {
+                    "employee_id": employee.id,
+                    "holiday_status_id": leave_type.id,
+                    "number_of_days": 22,
+                    "date_from": year_start,
+                }
+            )
+            allocation.action_approve()
+        log.append(
+            _("Alocação de 22 dias de férias criada para %s colaboradores")
+            % len(roster)
+        )
+
+        # 4 absences: 2 left pending approval, 2 already approved.
+        leave_employees = list(roster)[:4]
+        for index, employee in enumerate(leave_employees):
+            leave_start = today + timedelta(days=10 + index * 7)
+            leave = self.env["hr.leave"].create(
+                {
+                    "employee_id": employee.id,
+                    "holiday_status_id": leave_type.id,
+                    "request_date_from": leave_start,
+                    "request_date_to": leave_start + timedelta(days=4),
+                }
+            )
+            if index >= 2:
+                leave.action_approve()
+        log.append(_("4 pedidos de ausência criados (2 pendentes, 2 aprovados)"))
         return log
 
     def _demo_generate_milestone_invoicing(self, company, partner):
