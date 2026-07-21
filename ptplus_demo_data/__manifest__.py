@@ -18,7 +18,7 @@
         "ptplus_sale",
         "ptplus_stock",
         "crm",
-        "voip",
+        "voip_ai",
         "sale_management",
         "sale_project",
         "hr_timesheet",

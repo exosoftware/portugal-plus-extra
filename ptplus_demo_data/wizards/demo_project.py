@@ -234,6 +234,7 @@ class PtplusDemoDataWizard(models.TransientModel):
             topic: self._demo_get_or_create_tag("project.tags", topic)
             for _, topic, _ in tasks_data
         }
+        stage_by_state = self._demo_get_or_create_task_stages(project)
         for name, topic, state in tasks_data:
             self.env["project.task"].create(
                 {
@@ -243,70 +244,170 @@ class PtplusDemoDataWizard(models.TransientModel):
                     "user_ids": [Command.set([self.env.uid])],
                     "tag_ids": [Command.set([topic_tags[topic].id])],
                     "state": state,
+                    "stage_id": stage_by_state[state].id,
                 }
             )
         log.append(_("%s tarefas criadas, uma por tópico") % len(tasks_data))
         return log
 
+    def _demo_get_or_create_task_stages(self, project):
+        """Kanban stages for a project, one per task state used above.
+
+        project.task.stage_id is a compute(store=True, readonly=False)
+        field, but it doesn't reliably default to something via plain
+        ORM create() (nor for tasks sale_project auto-creates on order
+        confirmation) -- setting it explicitly avoids tasks with no stage.
+        """
+        stage_names = {
+            "01_in_progress": (_("Em Curso"), 1, False),
+            "02_changes_requested": (_("Alterações Pedidas"), 2, False),
+            "04_waiting_normal": (_("Em Espera"), 3, False),
+            "1_done": (_("Concluído"), 4, True),
+        }
+        stages = {}
+        for state, (name, sequence, fold) in stage_names.items():
+            stage = self.env["project.task.type"].search(
+                [("name", "=", name), ("project_ids", "in", project.id)], limit=1
+            )
+            if not stage:
+                stage = self.env["project.task.type"].create(
+                    {
+                        "name": name,
+                        "sequence": sequence,
+                        "fold": fold,
+                        "project_ids": [Command.link(project.id)],
+                    }
+                )
+            stages[state] = stage
+        return stages
+
+    def _demo_ensure_task_stages(self, company):
+        """Backfill stage_id for any task left without one.
+
+        Tasks that sale_project auto-creates on order confirmation
+        (service_tracking) don't always get a default kanban stage.
+        """
+        tasks_without_stage = self.env["project.task"].search(
+            [("company_id", "=", company.id), ("stage_id", "=", False)]
+        )
+        for task in tasks_without_stage:
+            stage = self.env["project.task.type"].search(
+                [("project_ids", "in", task.project_id.id)], order="sequence", limit=1
+            )
+            if not stage:
+                stage = self.env["project.task.type"].create(
+                    {
+                        "name": _("A Fazer"),
+                        "sequence": 1,
+                        "project_ids": [Command.link(task.project_id.id)],
+                    }
+                )
+            task.stage_id = stage.id
+
+    def _demo_split_daily_hours(self, daily_total, num_tasks):
+        """Split a day's total hours across num_tasks lines, each a multiple
+        of 0.5, summing exactly to daily_total (so no line -- and therefore
+        no task -- can ever exceed the day's own total)."""
+        if num_tasks <= 1:
+            return [daily_total]
+        portions = []
+        remaining = daily_total
+        for tasks_left in range(num_tasks, 1, -1):
+            # Leave at least 0.5h for each remaining task after this one.
+            max_portion = remaining - 0.5 * (tasks_left - 1)
+            portion = round(random.uniform(0.5, max(0.5, max_portion)) * 2) / 2
+            portion = min(portion, remaining - 0.5 * (tasks_left - 1))
+            portions.append(portion)
+            remaining -= portion
+        portions.append(remaining)
+        return portions
+
     def _demo_generate_timesheets(self, company, partner):
         log = []
         roster = list(self._demo_get_or_create_employee_roster(company))
-        tasks = self.env["project.task"].search([("company_id", "=", company.id)])
+        tasks = list(self.env["project.task"].search([("company_id", "=", company.id)]))
         if not tasks:
             return log
         hour_uom = self.env.ref("uom.product_uom_hour")
         today = fields.Date.context_today(self)
-        # Every weekday (Mon-Fri) of the previous ISO week, plus every
-        # weekday of the current week up to today -- anchored on actual
-        # week boundaries so the previous week is always fully covered,
-        # regardless of which weekday "today" falls on.
-        this_monday = today - timedelta(days=today.weekday())
-        previous_monday = this_monday - timedelta(days=7)
+        # Last 30 days, weekdays only -- nobody logs time on Sat/Sun.
+        MAX_DAILY_HOURS = 8.0
         weekdays = [
-            previous_monday + timedelta(days=i)
-            for i in range((today - previous_monday).days + 1)
-            if (previous_monday + timedelta(days=i)).weekday() < 5
+            today - timedelta(days=offset)
+            for offset in range(30)
+            if (today - timedelta(days=offset)).weekday() < 5
         ]
         count = 0
-        for task in tasks:
-            entry_count = random.randint(3, 5)
-            task_employees = random.sample(roster, min(len(roster), entry_count))
-            while len(task_employees) < entry_count:
-                task_employees.append(random.choice(roster))
-            task_dates = random.sample(weekdays, min(len(weekdays), entry_count))
-            while len(task_dates) < entry_count:
-                task_dates.append(random.choice(weekdays))
-            for employee, date in zip(task_employees, task_dates):
-                hours = round(random.uniform(1.0, 6.0) * 2) / 2
-                self.env["account.analytic.line"].create(
-                    {
-                        "name": _("Trabalho realizado"),
-                        "employee_id": employee.id,
-                        "project_id": task.project_id.id,
-                        "task_id": task.id,
-                        "product_uom_id": hour_uom.id,
-                        "unit_amount": hours,
-                        "date": date,
-                    }
-                )
-                count += 1
+        for employee in roster:
+            # "Almost every day", not literally every day -- randomly skip
+            # ~15% of weekdays (day off, sick, etc.) for realism.
+            worked_days = [d for d in weekdays if random.random() > 0.15]
+            for date in worked_days:
+                daily_total = round(random.uniform(3.0, MAX_DAILY_HOURS) * 2) / 2
+                num_tasks_today = min(random.choice([1, 1, 2, 2, 3]), len(tasks))
+                day_tasks = random.sample(tasks, num_tasks_today)
+                for task, hours in zip(
+                    day_tasks,
+                    self._demo_split_daily_hours(daily_total, num_tasks_today),
+                ):
+                    if hours <= 0:
+                        continue
+                    self.env["account.analytic.line"].create(
+                        {
+                            "name": _("Trabalho realizado"),
+                            "employee_id": employee.id,
+                            "project_id": task.project_id.id,
+                            "task_id": task.id,
+                            "product_uom_id": hour_uom.id,
+                            "unit_amount": hours,
+                            "date": date,
+                        }
+                    )
+                    count += 1
         log.append(
-            _("Registo de horas criado: %s lançamentos em %s tarefas")
-            % (count, len(tasks))
+            _(
+                "Registo de horas criado: %s lançamentos para %s colaboradores "
+                "nos últimos 30 dias (máx. %s horas/dia, sem fins de semana)"
+            )
+            % (count, len(roster), int(MAX_DAILY_HOURS))
         )
         return log
 
     def _demo_generate_planning(self, company, partner):
         log = []
-        project = self._demo_get_or_create_project(company)
-        roster = self._demo_get_or_create_employee_roster(company)
+        # By this point (planning runs after project/sales), the company
+        # already has several distinct projects: the main one plus whatever
+        # sale_project auto-created from the won opportunity and confirmed
+        # orders in _demo_generate_sales -- spread slots across all of them
+        # instead of just the main project, so Planning doesn't show one
+        # identical block for every employee.
+        # Exclude project templates (is_template=True, never meant to hold
+        # real work) and the auto-created internal project -- only real
+        # client-facing projects should get planning slots.
+        projects = list(
+            self.env["project.project"].search(
+                [
+                    ("company_id", "=", company.id),
+                    ("is_template", "=", False),
+                    ("is_internal_project", "=", False),
+                ]
+            )
+        )
+        if not projects:
+            projects = [self._demo_get_or_create_project(company)]
+        random.shuffle(projects)
+        roster = list(self._demo_get_or_create_employee_roster(company))
         role = self._demo_get_or_create_tag(
             "planning.role",
             self._demo_sector_name(_("Consultor"), _("Engenheiro Civil")),
         )
-        start = fields.Datetime.now()
-        end = start + timedelta(days=31)
-        for employee in roster:
+        today = fields.Datetime.now()
+        for index, employee in enumerate(roster):
+            project = projects[index % len(projects)]
+            # Stagger start dates over the next 3 weeks and vary each slot's
+            # length (1-5 weeks) so dates don't all line up either.
+            start = today + timedelta(days=random.randint(-5, 15))
+            end = start + timedelta(weeks=random.randint(1, 5))
             self.env["planning.slot"].create(
                 {
                     "resource_id": employee.resource_id.id,
@@ -318,8 +419,8 @@ class PtplusDemoDataWizard(models.TransientModel):
                 }
             )
         log.append(
-            _("%s turnos de planeamento criados (1 mês cada, um por colaborador)")
-            % len(roster)
+            _("%s turnos de planeamento criados em %s projetos, com datas variadas")
+            % (len(roster), len(projects))
         )
         log += self._demo_generate_time_off(company, roster)
         return log
@@ -359,21 +460,52 @@ class PtplusDemoDataWizard(models.TransientModel):
             % len(roster)
         )
 
-        # 4 absences: 2 left pending approval, 2 already approved.
-        leave_employees = list(roster)[:4]
-        for index, employee in enumerate(leave_employees):
-            leave_start = today + timedelta(days=10 + index * 7)
-            leave = self.env["hr.leave"].create(
-                {
-                    "employee_id": employee.id,
-                    "holiday_status_id": leave_type.id,
-                    "request_date_from": leave_start,
-                    "request_date_to": leave_start + timedelta(days=4),
-                }
+        # Every employee gets several leave requests totalling 17-22 days
+        # (close to their full 22-day allocation, like real vacation
+        # planning). Each request is Monday-anchored and spans at most 5
+        # working days, so its actual day count is predictable up front
+        # without depending on the employee's resource calendar. The last
+        # request per employee is left pending; earlier ones are approved,
+        # giving every employee a mix of both.
+        total_pending = 0
+        total_approved = 0
+        for emp_index, employee in enumerate(roster):
+            target_days = 17 + (emp_index % 6)
+            cursor = today + timedelta(days=10 + emp_index * 12)
+            periods = []
+            remaining = target_days
+            while remaining > 0:
+                days = min(5, remaining)
+                start = cursor + timedelta(days=(7 - cursor.weekday()) % 7)
+                periods.append((start, days))
+                remaining -= days
+                cursor = start + timedelta(days=days + 7)
+            for period_index, (start, days) in enumerate(periods):
+                leave = self.env["hr.leave"].create(
+                    {
+                        "employee_id": employee.id,
+                        "holiday_status_id": leave_type.id,
+                        "request_date_from": start,
+                        "request_date_to": start + timedelta(days=days - 1),
+                    }
+                )
+                if period_index < len(periods) - 1:
+                    leave.action_approve()
+                    total_approved += 1
+                else:
+                    total_pending += 1
+        log.append(
+            _(
+                "Pedidos de férias criados para %(count)s colaboradores "
+                "(17 a 22 dias cada; %(approved)s pedidos aprovados, "
+                "%(pending)s pendentes)"
             )
-            if index >= 2:
-                leave.action_approve()
-        log.append(_("4 pedidos de ausência criados (2 pendentes, 2 aprovados)"))
+            % {
+                "count": len(roster),
+                "approved": total_approved,
+                "pending": total_pending,
+            }
+        )
         return log
 
     def _demo_generate_milestone_invoicing(self, company, partner):

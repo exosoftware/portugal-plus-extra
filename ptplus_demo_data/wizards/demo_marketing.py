@@ -148,6 +148,15 @@ class PtplusDemoDataWizard(models.TransientModel):
         self._demo_generate_mailing_traces(
             variant_b, contacts, open_rate=0.30, click_rate=0.10, bounce_rate=0.08
         )
+        # _compute_statistics reads mailing.trace directly, so the ratios are
+        # correct even in 'draft', but the Opened/Clicked/Delivered/Replied
+        # smart buttons are only shown once state is out of ('draft', 'test')
+        # (mass_mailing/views/mailing_mailing_views.xml) -- without this,
+        # fabricating traces alone leaves those buttons hidden even though
+        # the mailing clearly has engagement data.
+        (variant_a + variant_b).write(
+            {"state": "done", "sent_date": fields.Datetime.now()}
+        )
         ab_campaign.ab_testing_winner_mailing_id = variant_a
         log.append(
             _("Teste A/B criado: '%s' vs '%s' (%s contactos)")

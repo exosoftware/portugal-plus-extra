@@ -213,10 +213,23 @@ class PtplusDemoDataWizard(models.TransientModel):
         # res.users.company_ids being updated is not enough on its own for a
         # non-superuser admin. sudo() on top removes any remaining
         # per-model multi-company rule friction for this admin-only wizard.
+        #
+        # `company.id` MUST be the first element of allowed_company_ids:
+        # Environment.company (odoo/orm/environments.py) resolves to
+        # `allowed_company_ids[0]`, and company_dependent field writes
+        # (e.g. product.template.project_id/project_template_id, used for
+        # sale_project's service_tracking) are keyed off that -- putting it
+        # anywhere else in the list means those fields silently get stored
+        # under some *other* company's key (whichever the admin user's
+        # company_ids happens to list first) and read back as empty for the
+        # actual demo company.
+        other_company_ids = [
+            cid for cid in self.env.user.company_ids.ids if cid != company.id
+        ]
         demo = (
             self.sudo()
             .with_company(company)
-            .with_context(allowed_company_ids=(self.env.user.company_ids | company).ids)
+            .with_context(allowed_company_ids=[company.id] + other_company_ids)
         )
         demo._demo_create_warehouse(company)
         demo._demo_activate_pt_localization(company)

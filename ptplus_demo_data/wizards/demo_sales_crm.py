@@ -3,6 +3,8 @@
 #    Copyright (C) 2026 Exo Software, Lda. (<https://exosoftware.pt>)
 #
 ##############################################################################
+import base64
+
 from odoo import _, models
 from odoo.fields import Command
 
@@ -48,6 +50,7 @@ class PtplusDemoDataWizard(models.TransientModel):
                     60,
                 ),
             ]
+        won_opportunity = False
         for name, revenue, stage, probability in opportunities:
             lead = self.env["crm.lead"].create(
                 {
@@ -63,6 +66,156 @@ class PtplusDemoDataWizard(models.TransientModel):
                 }
             )
             log.append(_("Oportunidade CRM criada: %s") % lead.name)
+            if stage == stages["won"] and not won_opportunity:
+                won_opportunity = lead
+        if won_opportunity:
+            log += self._demo_generate_won_opportunity_order(
+                company, partner, won_opportunity
+            )
+        return log
+
+    def _demo_generate_won_opportunity_order(self, company, partner, opportunity):
+        """A won opportunity needs an OR (quotation) that actually shows up
+        on its "Quotations" smart button, plus a confirmed order whose
+        auto-created project has documents in it.
+
+        Both can't be the same sale.order: crm.lead.quotation_count only
+        counts orders still in draft/sent state (sale_crm/models/
+        crm_lead.py _get_lead_quotation_domain) -- once one is confirmed it
+        moves to the separate "Orders" smart button instead. So this creates
+        two distinct orders against the same opportunity: one left as a
+        draft OR, one confirmed into the project-creating order.
+        """
+        log = []
+        # Same 2 sections x 2 subsections shape as the other sectioned
+        # quotations in _demo_generate_sales, and its lines must be service
+        # articles configured to generate tasks/projects (task_global_project
+        # / task_in_project) rather than a plain consulting line.
+        existing_project = self._demo_get_or_create_project(company)
+        quotation_products = self.env["product.template"]
+        for prod_name in [
+            _("Consultoria Especializada (Horas)"),
+            _("Acompanhamento Técnico"),
+        ]:
+            quotation_products |= self._demo_get_or_create_service_product(
+                company,
+                prod_name,
+                95.0,
+                "task_global_project",
+                project_id=existing_project.id,
+            )
+        for prod_name in [
+            _("Implementação - Fase Inicial"),
+            _("Implementação - Fase Final"),
+        ]:
+            quotation_products |= self._demo_get_or_create_service_product(
+                company, prod_name, 2500.0, "task_in_project"
+            )
+
+        # The first product of the first section (Secção 1 / Subsecção 1.1,
+        # per _demo_build_quotation_lines's ordering) gets a document
+        # attached to it directly. product.template's "Documents" smart
+        # button counts product.document (product/models/product_template.py
+        # _get_product_document_domain), not documents.document -- that's
+        # the Documents *app*'s own separate model, and unrelated here.
+        first_product = list(quotation_products)[0]
+        self.env["product.document"].create(
+            {
+                "name": "Ficha_Tecnica_%s.txt" % first_product.id,
+                "res_model": "product.template",
+                "res_id": first_product.id,
+                "datas": base64.b64encode(
+                    (_("Ficha técnica do artigo %s.") % first_product.name).encode()
+                ),
+                "company_id": company.id,
+            }
+        )
+        log.append(
+            _("Documento associado ao artigo '%s' (1ª linha da 1ª secção)")
+            % first_product.name
+        )
+
+        quotation = self.env["sale.order"].create(
+            {
+                "partner_id": partner.id,
+                "company_id": company.id,
+                "opportunity_id": opportunity.id,
+                "order_line": self._demo_build_quotation_lines(
+                    list(quotation_products)
+                ),
+            }
+        )
+        quotation.pt_issue()
+        log.append(
+            _("Orçamento (OR) com secções criado para a oportunidade ganha " "'%s': %s")
+            % (opportunity.name, quotation.name)
+        )
+
+        product = self._demo_get_or_create_service_product(
+            company, _("Implementação - Projeto Fechado"), 18000.0, "task_in_project"
+        )
+        order = self.env["sale.order"].create(
+            {
+                "partner_id": partner.id,
+                "company_id": company.id,
+                "opportunity_id": opportunity.id,
+                "order_line": [
+                    Command.create(
+                        {
+                            "product_id": product.product_variant_id.id,
+                            "product_uom_qty": 1,
+                        }
+                    )
+                ],
+            }
+        )
+        order.action_confirm()
+        log.append(
+            _("Orçamento confirmado para a oportunidade ganha '%s': %s")
+            % (opportunity.name, order.name)
+        )
+
+        project = order.order_line.project_id
+        if project:
+            # sale_project names it after the order/product by default (e.g.
+            # "NE A/00002 - Implementação - Projeto Fechado") -- same reason
+            # as the other auto-created projects in _demo_generate_sales:
+            # read like a real project instead of a document reference.
+            project.name = (
+                self._demo_sector_name(_("Projeto"), _("Obra"))
+                + " - "
+                + opportunity.name
+            )
+            root_folder = company.documents_project_folder_id
+            project_folder = self.env["documents.document"].create(
+                {
+                    "name": project.name,
+                    "type": "folder",
+                    "folder_id": root_folder.id,
+                    "company_id": company.id,
+                }
+            )
+            project.documents_folder_id = project_folder.id
+            documents_data = [
+                ("Contrato_Assinado.txt", "Contrato assinado com o cliente."),
+                ("Plano_de_Projeto.txt", "Plano de execução do projeto."),
+            ]
+            for filename, content in documents_data:
+                self.env["documents.document"].create(
+                    {
+                        "name": filename,
+                        "folder_id": project_folder.id,
+                        "datas": base64.b64encode(content.encode()),
+                        "res_model": "project.project",
+                        "res_id": project.id,
+                        "owner_id": self.env.uid,
+                        "company_id": company.id,
+                    }
+                )
+            log.append(
+                _("Pasta de documentos criada para o projeto '%s' com %s documentos")
+                % (project.name, len(documents_data))
+            )
         return log
 
     def _demo_generate_voip(self, company, partner):
@@ -102,10 +255,9 @@ class PtplusDemoDataWizard(models.TransientModel):
                 }
             )
             if with_transcript:
-                # voip.call has no dedicated transcript field; it inherits
-                # mail.thread (via mail.thread.main.attachment), so a chatter
-                # note is the standard way to attach one.
-                call.message_post(body=next(transcripts))
+                # `summary` is added to voip.call by voip_ai (auto-installed
+                # alongside voip+ai, both already demo_data dependencies).
+                call.summary = next(transcripts)
                 transcript_count += 1
             log.append(
                 _("Chamada VoIP registada: %s (%s)") % (call.phone_number, state)
@@ -372,19 +524,89 @@ class PtplusDemoDataWizard(models.TransientModel):
             {
                 "partner_id": partner.id,
                 "company_id": company.id,
+                # Explicit, distinct sequence per line: sale_project processes
+                # so_line_new_project sorted by (sequence, id) when deciding
+                # whether to create a new project per line -- each of these 3
+                # lines has its own product_template_id already, but giving
+                # them an unambiguous processing order removes any residual
+                # risk of that sort behaving unexpectedly.
                 "order_line": [
                     Command.create(
-                        {"product_id": p.product_variant_id.id, "product_uom_qty": 1}
+                        {
+                            "product_id": p.product_variant_id.id,
+                            "product_uom_qty": 1,
+                            "sequence": (index + 1) * 10,
+                        }
                     )
-                    for p in project_products
+                    for index, p in enumerate(project_products)
                 ],
             }
         )
         confirmed_project_order.action_confirm()
+        # sale_project names the auto-generated project after the order
+        # (e.g. "NE A/00003") -- rename to something that reads like a real
+        # project rather than a document reference.
+        new_project_names = self._demo_sector_name(
+            [_("Projeto Alfa"), _("Projeto Beta"), _("Projeto Gama")],
+            [
+                _("Obra - Condomínio no Porto"),
+                _("Construção - Parque da Cidade"),
+                _("Reabilitação - Edifício Histórico"),
+            ],
+        )
+        for line, name in zip(confirmed_project_order.order_line, new_project_names):
+            if line.project_id:
+                line.project_id.name = name
+        # Each new project only has the single auto-generated task -- add a
+        # few more per project so Timesheets has more than one task to
+        # distribute hours across per project.
+        extra_task_names = self._demo_sector_name(
+            [
+                [_("Planeamento"), _("Execução"), _("Entrega")],
+                [_("Planeamento"), _("Execução"), _("Entrega")],
+                [_("Planeamento"), _("Execução"), _("Entrega")],
+            ],
+            [
+                [
+                    _("Escavação e Fundações"),
+                    _("Estrutura e Alvenaria"),
+                    _("Acabamentos e Entrega"),
+                ],
+                [
+                    _("Terraplanagem"),
+                    _("Instalação de Equipamentos"),
+                    _("Paisagismo"),
+                ],
+                [
+                    _("Levantamento e Diagnóstico"),
+                    _("Recuperação de Fachada"),
+                    _("Requalificação Interior"),
+                ],
+            ],
+        )
+        extra_task_states = ["01_in_progress", "04_waiting_normal", "1_done"]
+        for line, names in zip(confirmed_project_order.order_line, extra_task_names):
+            if not line.project_id:
+                continue
+            stage_by_state = self._demo_get_or_create_task_stages(line.project_id)
+            for name, state in zip(names, extra_task_states):
+                self.env["project.task"].create(
+                    {
+                        "name": name,
+                        "project_id": line.project_id.id,
+                        "company_id": company.id,
+                        "user_ids": [Command.set([self.env.uid])],
+                        "state": state,
+                        "stage_id": stage_by_state[state].id,
+                    }
+                )
+        # Tasks that sale_project auto-creates on confirmation don't always
+        # get a default kanban stage -- backfill any left without one.
+        self._demo_ensure_task_stages(company)
         log.append(
             _(
                 "2 encomendas confirmadas (%s, %s) para gerar as tarefas/"
-                "projetos automaticamente"
+                "projetos automaticamente, com 3 tarefas extra por projeto novo"
             )
             % (confirmed_task_order.name, confirmed_project_order.name)
         )
